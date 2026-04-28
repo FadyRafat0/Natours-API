@@ -1,0 +1,38 @@
+{
+    "name": "fady-package",
+    "version": "1.0.0",
+    "description": "for testing",
+    "homepage": "https://github.com/FadyRafat0/complete-node-bootcamp#readme",
+    "bugs": {
+        "url": "https://github.com/FadyRafat0/complete-node-bootcamp/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/FadyRafat0/complete-node-bootcamp.git"
+    },
+    "license": "ISC",
+    "author": "fady rafat",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "start": "cross-env NODE_ENV=development nodemon 4-natours/starter/server.js",
+        "start:prod": "cross-env NODE_ENV=production nodemon 4-natours/starter/server.js",
+        "debug": "cross-env NODE_ENV=development ndb 4-natours/starter/server.js"
+    },
+    "dependencies": {
+        "bcryptjs": "^3.0.3",
+        "cross-env": "^10.1.0",
+        "dotenv": "^17.3.1",
+        "express": "^5.2.1",
+        "jsonwebtoken": "^9.0.3",
+        "mongodb": "^7.1.0",
+        "mongoose": "^9.2.1",
+        "morgan": "^1.10.1",
+        "slugify": "^1.6.6",
+        "superagent": "^10.3.0",
+        "validator": "^13.15.35"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.14"
+    }
+}
