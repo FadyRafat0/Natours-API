@@ -2,10 +2,6 @@
 
 A complete, production-ready REST API for a tour booking application. Built with Node.js, Express, and MongoDB, this backend system handles everything from advanced user authentication and role-based authorization to geospatial mapping and secure payment processing.
 
-## 🚀 Live Demo & Documentation
-* **API Endpoint:** `[Add your deployed link here later if you use Render/Heroku]`
-* **Documentation:** `[Link to published Postman docs here if you have them]`
-
 ## 🛠 Tech Stack
 * **Runtime:** Node.js
 * **Framework:** Express.js
