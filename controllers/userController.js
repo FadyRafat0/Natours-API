@@ -1,6 +1,6 @@
 import User from '../models/userModel.js';
-import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
+import * as factoryHandler from './factoryHandler.js';
 
 export const filterObj = (obj, ...allowedFields) => {
     const newObj = {};
@@ -10,53 +10,25 @@ export const filterObj = (obj, ...allowedFields) => {
     return newObj;
 };
 
-export const getAllUsers = async (req, res) => {
-    const users = await User.find();
+export const getUser = factoryHandler.getOne(
+    User,
+    {},
+    {
+        path: 'reviews',
+        options: { populateTour: true },
+    },
+);
+export const getAllUsers = factoryHandler.getAll(User);
+// DO NOT change password or email with this !
+export const updateUser = factoryHandler.updateOne(User);
+export const deleteUser = factoryHandler.deleteOne(User);
 
-    res.status(200).json({
-        status: 'success',
-        data: users,
-    });
+// we are logged in
+export const setUserId = (req, res, next) => {
+    req.params.id = req.user.id;
+    next();
 };
-export const addUser = (req, res) => {
-    res.status(500).json({
-        status: 'fail',
-        message: 'route handler is not implemented yet',
-    });
-};
-export const getUser = (req, res) => {
-    res.status(500).json({
-        status: 'fail',
-        message: 'route handler is not implemented yet',
-    });
-};
-export const updateUser = catchAsync(async (req, res, next) => {
-    // 1) Get user from database
-    const user = await User.findById(req.params.id);
-    if (!user) return next(new AppError('No user found with that ID', 404));
-
-    // 2) Update user fields
-    Object.keys(req.body).forEach((key) => {
-        user[key] = req.body[key];
-    });
-
-    // 3) Save (triggers pre-save hooks and validators)
-    await user.save();
-
-    res.status(200).json({
-        status: 'success',
-        message: 'user updated successfully',
-        data: user,
-    });
-});
-export const deleteUser = (req, res) => {
-    res.status(500).json({
-        status: 'fail',
-        message: 'route handler is not implemented yet',
-    });
-};
-
-export const updateMe = catchAsync(async (req, res, next) => {
+export const updateCheck = (req, res, next) => {
     // Create error if user trying to update password
     if (req.body.password || req.body.passwordConfirm) {
         return next(
@@ -69,27 +41,8 @@ export const updateMe = catchAsync(async (req, res, next) => {
 
     // filer the object to just update the name, email, photo
     const filteredBody = filterObj(req.body, 'name', 'email', 'photo');
+    req.body = filteredBody;
 
-    // update user document
-    const user = await User.findByIdAndUpdate(req.user.id, filteredBody, {
-        new: true,
-        runValidators: true,
-    });
-
-    res.status(200).json({
-        status: 'success',
-        date: {
-            user,
-        },
-    });
-});
-
-export const deleteMe = catchAsync(async (req, res, next) => {
-    await User.findByIdAndDelete(req.user.id);
-    // we are logged in
-
-    res.status(204).json({
-        status: 'succes',
-        data: null,
-    });
-});
+    // console.log(req.body);
+    next();
+};

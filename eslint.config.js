@@ -21,7 +21,7 @@ export default [
                 'warn',
                 { argsIgnorePattern: 'req|res|next|val' },
             ],
-            'prefer-destructuring': ['error', { object: true, array: false }],
+            'prefer-destructuring': ['warn', { object: true, array: false }],
             'consistent-return': 'off',
             'func-names': 'off',
             'object-shorthand': 'off',

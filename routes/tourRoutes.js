@@ -1,10 +1,9 @@
 import express from 'express';
 import * as tourController from '../controllers/tourController.js';
 import * as authController from '../controllers/authController.js';
+import reviewRouter from '../routes/reviewRouter.js';
 
 const router = express.Router();
-
-// router.param('id', tourController.checkID);
 
 router.route('/stats').get(tourController.getTourStats);
 
@@ -12,21 +11,43 @@ router
     .route('/top-5-expensive')
     .get(tourController.aliasTopTours, tourController.getAllTours);
 
-router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+router
+    .route('/monthly-plan/:year')
+    .get(
+        authController.authenticateUser,
+        authController.authorizeRoles('admin', 'lead-guide', 'guide'),
+        tourController.getMonthlyPlan,
+    );
+
+router.get(
+    '/tours-within-miles/:distance/center/:latlng',
+    tourController.getToursWithin,
+);
+router.get('/distances/:latlng', tourController.getDistances);
 
 router
     .route('/')
-    .get(authController.authenticateUser, tourController.getAllTours)
-    .post(tourController.createTour);
+    .get(tourController.getAllTours)
+    .post(
+        authController.authenticateUser,
+        authController.authorizeRoles('admin', 'lead-guide'),
+        tourController.createTour,
+    );
 
 router
     .route('/:id')
     .get(tourController.getTour)
-    .patch(tourController.updateTour)
+    .patch(
+        authController.authenticateUser,
+        authController.authorizeRoles('admin', 'lead-guide'),
+        tourController.updateTour,
+    )
     .delete(
         authController.authenticateUser,
         authController.authorizeRoles('admin', 'lead-guide'),
         tourController.deleteTour,
     );
+
+router.use('/:tourId/reviews', reviewRouter);
 
 export default router;

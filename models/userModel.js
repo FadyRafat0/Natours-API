@@ -5,56 +5,71 @@ import crypto from 'crypto';
 import otpGenerator from 'otp-generator';
 
 // name, email, photo, password, passwordConfirm
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Please tell us your name'],
-    },
-    email: {
-        type: String,
-        unique: [true, 'Email must be unique'],
-        required: [true, 'Please tell us your email'],
-        lowercase: true,
-        validate: [validator.isEmail, 'Please provide a valid email'],
-    },
-    isEmailConfirmed: {
-        type: Boolean,
-        default: false,
-    },
-    emailOTP: String,
-    emailOTPExpiresIn: Date,
-    photo: {
-        type: String,
-    },
-    password: {
-        type: String,
-        required: [true, 'Please provide a password!'],
-        validate: [validator.isStrongPassword, 'Please make a strong password'],
-        select: false, // to not show in the output
-    },
-    role: {
-        type: String,
-        enum: ['user', 'guide', 'lead-guide', 'admin'],
-        default: 'user',
-    },
-    passwordConfirm: {
-        type: String,
-        required: [true, 'Please confirm the password'],
-        // This Only Works With SAVE on .create() .save()
-        validate: {
-            validator: function (val) {
-                return this.password === val;
-            },
-            message: 'Passwords are not the same',
+const userSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: [true, 'Please tell us your name'],
         },
-        select: false, // to not show in the output
+        email: {
+            type: String,
+            unique: [true, 'Email must be unique'],
+            required: [true, 'Please tell us your email'],
+            lowercase: true,
+            validate: [validator.isEmail, 'Please provide a valid email'],
+        },
+        isEmailConfirmed: {
+            type: Boolean,
+            default: false,
+        },
+        emailOTP: String,
+        emailOTPExpiresIn: Date,
+        photo: {
+            type: String,
+        },
+        password: {
+            type: String,
+            required: [true, 'Please provide a password!'],
+            validate: [
+                validator.isStrongPassword,
+                'Please make a strong password',
+            ],
+            select: false, // to not show in the output
+        },
+        role: {
+            type: String,
+            enum: ['user', 'guide', 'lead-guide', 'admin'],
+            default: 'user',
+        },
+        passwordConfirm: {
+            type: String,
+            required: [true, 'Please confirm the password'],
+            // This Only Works With SAVE on .create() .save()
+            validate: {
+                validator: function (val) {
+                    return this.password === val;
+                },
+                message: 'Passwords are not the same',
+            },
+            select: false, // to not show in the output
+        },
+        passwordChangedAt: {
+            type: Date,
+            default: Date.now,
+        },
+        passwordResetToken: String,
+        passwordResetExpires: Date,
     },
-    passwordChangedAt: {
-        type: Date,
-        default: Date.now,
+    {
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
     },
-    passwordResetToken: String,
-    passwordResetExpires: Date,
+);
+
+userSchema.virtual('reviews', {
+    ref: 'Review',
+    foreignField: 'user',
+    localField: '_id',
 });
 
 // Password

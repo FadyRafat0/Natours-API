@@ -11,7 +11,7 @@ const DB = process.env.DATABASE.replace(
 
 mongoose
     .connect(DB)
-    .then((con) => {
+    .then(() => {
         console.log('DB connection successful!');
         // console.log(con.connections);
     })

@@ -32,6 +32,7 @@ class APIFeatures {
         const sortBy = this.queryString.sort
             ? this.queryString.sort.split(',').join(' ')
             : '_id';
+
         this.query = this.query.sort(sortBy);
 
         return this;
@@ -54,7 +55,7 @@ class APIFeatures {
         // Manually -> query.skip(num).query(limit)
         // 5) Pagination
         const page = this.queryString.page * 1 || 1;
-        const limit = this.queryString.limit * 1 || 100;
+        const limit = this.queryString.limit * 1 || 50;
         const skip = (page - 1) * limit;
 
         this.query = this.query.skip(skip).limit(limit);

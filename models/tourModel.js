@@ -2,6 +2,18 @@ import mongoose from 'mongoose';
 import slugify from 'slugify';
 import validator from 'validator';
 
+const locationSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+    },
+    coordinates: [Number], // Expects an array of numbers [longitude, latitude]
+    address: String,
+    description: String,
+    day: Number,
+});
+
 const tourSchema = new mongoose.Schema(
     {
         name: {
@@ -11,12 +23,6 @@ const tourSchema = new mongoose.Schema(
             unique: [true, 'Name cannot be duplicate'],
             minlength: [10, 'Name must be at least 10 charcters'],
             maxlength: [40, 'Name must be at most 40 charcters'],
-            // validate: {
-            //     validator: function (v) {
-            //         return v.toLowerCase() != 'fuck you mother fucker';
-            //     },
-            //     message: 'BE KIND MAN !',
-            // },
             validate: validator.isAscii,
         },
         nameSlug: {
@@ -53,6 +59,8 @@ const tourSchema = new mongoose.Schema(
             default: 0,
             min: [1.0, 'Min rating must be at least 1.0'],
             max: [5.0, 'Max rating must be at most 5.0'],
+            // run each time we set a value on it
+            set: (val) => Math.round(val * 10) / 10.0,
         },
         ratingsQuantity: {
             type: Number,
@@ -82,6 +90,14 @@ const tourSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        startLocation: locationSchema,
+        locations: [locationSchema],
+        guides: [
+            {
+                type: mongoose.Schema.ObjectId,
+                ref: 'User', // Model name
+            },
+        ],
     },
     {
         toObject: { virtuals: true },
@@ -92,9 +108,17 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
 });
-tourSchema.virtual('durationMonths').get(function () {
-    return this.durationWeeks / 4;
+tourSchema.virtual('reviews', {
+    ref: 'Review',
+    foreignField: 'tour',
+    localField: '_id',
 });
+
+tourSchema.index({ ratingsAverage: 1 });
+// it will speed the queries for price, price&ratingsAverage
+tourSchema.index({ price: 1, ratingsAverage: 1 });
+tourSchema.index({ nameSlug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 // DOCUMENT MIDDLEWARE
 // PRE is called before updating in DB
@@ -103,6 +127,11 @@ tourSchema.pre('save', async function () {
     this.nameSlug = slugify(this.name, { lower: true });
 });
 
+// tourSchema.pre('save', async function () {
+//     const guidesPromises = this.guides.map(async (id) => User.findById(id));
+//     this.guides = await Promise.all(guidesPromises);
+// });
+
 // POST is called after saving the doc in DB
 // tourSchema.post('save', function (doc, next) {
 //     console.log(`From POST 1`);
@@ -110,15 +139,25 @@ tourSchema.pre('save', async function () {
 // });
 
 // QUERY MIDDLEWARE
+// tourSchema.pre(/^find/, function () {
+//     this.find({ secretTour: { $ne: true } });
+// });
+
 tourSchema.pre(/^find/, function () {
-    this.find({ secretTour: { $ne: true } });
+    const options = this.getOptions();
+    if (options.populateGuides) {
+        this.populate({
+            path: 'guides',
+            select: '-__v -passwordChangedAt',
+        });
+    }
 });
 
 // AGGREGATON MIDDLEWARE
-tourSchema.pre('aggregate', function () {
-    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-    // console.log(this.pipeline());
-});
+// tourSchema.pre('aggregate', function () {
+//     this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//     console.log(this.pipeline());
+// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 

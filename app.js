@@ -8,6 +8,7 @@ import hpp from 'hpp';
 
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import reviewRouter from './routes/reviewRouter.js';
 import AppError from './utils/appError.js';
 import errorHanlder from './controllers/errorController.js';
 
@@ -62,21 +63,19 @@ app.use(express.static(`${dirname}/public`));
 
 // Test Middleware
 app.use((req, res, next) => {
-    req.requestTime = new Date().toISOString();
-    // console.log(req.headers);
+    req.requestTime = new Date();
     next();
 });
 
 // Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all(/.*/, (req, res, next) => {
     next(new AppError(`Cannot access ${req.originalUrl} In This Server`, 404));
 });
 
 app.use(errorHanlder);
-
-// console.log(new Date('2024-06-01T12:00:00Z').getTime());
 
 export default app;

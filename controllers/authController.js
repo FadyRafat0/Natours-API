@@ -1,20 +1,24 @@
 /*
-    Codes related to authentication and authorization
-    401: Unauthorized
-    403: Forbidden
-    429: Too many requests
+    200	OK	         "Here are your tours!"
+    201	Created	     "User account created successfully!"
+    204	No Content	 "Tour deleted successfully." (Sends no data back)
+    400	Bad Request	 "You forgot the passwordConfirm field."
+    401	Unauthorized "Wrong password / Invalid JWT token."
+    403	Forbidden	 "You are not an admin. Access denied."
+    404	Not Found	 "No tour found with that ID."
+    500	Server Error "Something broke on our end."
 */
 
 import { promisify } from 'util'; // to convert callback based function to promise based function
+
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import sendEmail from '../utils/email.js';
-import crypto from 'crypto';
 
-// MIDDLEWARES
 // to protect the routes that only logged in users can access
 export const authenticateUser = catchAsync(async (req, res, next) => {
     // 1) Getting token and check of it's there
@@ -59,7 +63,7 @@ export const authenticateUser = catchAsync(async (req, res, next) => {
     }
 
     // 5) Check email verfied
-    if (!req.user.isEmailConfirmed) {
+    if (!user.isEmailConfirmed) {
         return next(
             new AppError(
                 'Your email address is not verified. Please verify it to perform this action.',
@@ -140,6 +144,7 @@ export const signup = catchAsync(async (req, res, next) => {
         message: 'Check your email, confirm it with OTP send !',
     });
 });
+
 // to login the user and send the token to client
 export const login = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
@@ -186,6 +191,7 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 
     createSendToken(user, 200, res);
 });
+
 export const forgotPassword = catchAsync(async (req, res, next) => {
     // 1) Get user based on email
     const user = await User.findOne({
@@ -194,28 +200,17 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
     // To prevent Email Enumeration attacks
     if (!user) {
-        return next(
-            new AppError(
+        // Fake Respond
+        return res.status(200).json({
+            status: 'success',
+            message:
                 'If an account with that email exists, a password reset link has been sent',
-                200,
-            ),
-        );
-    }
-
-    if (!user.isEmailConfirmed) {
-        return next(
-            new AppError(
-                'Please confirm the email address to reset the password',
-                401,
-            ),
-        );
+        });
     }
 
     // 2) Generate the random reset token
     const resetToken = user.createPasswordResetToken();
-    await user.save({
-        validateBeforeSave: false,
-    });
+    await user.save({ validateBeforeSave: false });
 
     // 3) Send the token into the user email
     const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
@@ -241,7 +236,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
             validateBeforeSave: false,
         });
 
-        return next(
+        next(
             new AppError(
                 'There was an error sending the email. Try again later!',
                 500,
@@ -249,8 +244,8 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
         );
     }
 });
+
 export const resetPassword = catchAsync(async (req, res, next) => {
-    // Get user based on the token
     const resetToken = crypto
         .createHash('sha256')
         .update(req.params.token)
@@ -258,12 +253,9 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
     const user = await User.findOne({
         passwordResetToken: resetToken,
-        passwordResetExpires: {
-            $gte: Date.now(),
-        },
+        passwordResetExpires: { $gte: Date.now() },
     });
 
-    // If token has not expired , and there is user, set new password
     if (!user) {
         return next(
             new AppError(
@@ -273,13 +265,25 @@ export const resetPassword = catchAsync(async (req, res, next) => {
         );
     }
 
-    // need to reset the passwordResetToken , passwordResetExpires (they are 1 time reset passwords)
+    // 1) Set new passwords
     user.password = req.body.password;
     user.passwordConfirm = req.body.passwordConfirm;
+
+    // 2) Clear reset tokens
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
+
+    // 3) AUTO-CONFIRM THE EMAIL! (Since they clicked an emailed link to get here)
+    if (!user.isEmailConfirmed) {
+        user.isEmailConfirmed = true;
+        user.emailOTP = undefined;
+        user.emailOTPExpiresIn = undefined;
+    }
+
+    // 4) Save with validation ON so Mongoose checks the passwords match
     await user.save({ validateBeforeSave: true });
 
+    // 5) Log them in immediately
     createSendToken(user, 200, res);
 });
 
@@ -328,7 +332,7 @@ export const resendEmailVerification = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // Send email
-    const URL = `${req.protocol}://${req.get('host')}/api/v1/users/confirmEmail`;
+    const URL = `${req.protocol}://${req.get('host')}/api/v1/users/verifyEmail`;
     await sendEmail({
         email: user.email,
         subject: 'Your NEW OTP (10 minutes valid)',
