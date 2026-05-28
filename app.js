@@ -31,6 +31,7 @@ app.use(
                 styleSrc: [
                     "'self'",
                     'https://fonts.googleapis.com',
+                    'https://unpkg.com',
                     "'unsafe-inline'",
                 ],
                 connectSrc: [
@@ -96,7 +97,7 @@ app.use(express.static(`${dirname}/public`));
 // Test Middleware
 app.use((req, res, next) => {
     req.requestTime = new Date();
-    console.log(req.cookies);
+    // console.log(req.cookies);
     next();
 });
 

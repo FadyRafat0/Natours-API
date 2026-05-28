@@ -46,6 +46,8 @@ block content
               a.btn-text(href='') Choose new photo
             .form__group.right
               button.btn.btn--small.btn--green Save settings
+              - if (!user.isEmailConfirmed)
+                button#verify-email-btn.btn.btn--small(type='button' style='margin-left: 1rem; background: transparent; border: 2px solid #55c57a; color: #55c57a;') Send Email Verification
               
         .line &nbsp;
         

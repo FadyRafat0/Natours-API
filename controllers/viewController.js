@@ -47,7 +47,6 @@ export const getSignupForm = catchAsync(async (req, res, next) => {
 export const getVerifyEmailForm = catchAsync(async (req, res, next) => {
     res.status(200).render('verifyEmail', {
         title: `Verify your email`,
-        email: req.query.email || '',
     });
 });
 export const getForgotPasswordForm = catchAsync(async (req, res, next) => {

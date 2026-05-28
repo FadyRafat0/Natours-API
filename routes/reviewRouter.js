@@ -12,6 +12,7 @@ router
     .get(reviewController.setFilterTourId, reviewController.getAllReviews)
     .post(
         authController.authorizeRoles('user'),
+        authController.checkEmailVerified,
         reviewController.setTourUserIds,
         reviewController.createReview,
     );
@@ -19,15 +20,12 @@ router
 router
     .route('/:id')
     .get(reviewController.getReview)
-    .patch(
+    .all(
         authController.authorizeRoles('user', 'admin'),
+        authController.checkEmailVerified,
         reviewController.checkIfAuthor,
-        reviewController.updateReview,
     )
-    .delete(
-        authController.authorizeRoles('user', 'admin'),
-        reviewController.checkIfAuthor,
-        reviewController.deleteReview,
-    );
+    .patch(reviewController.updateReview)
+    .delete(reviewController.deleteReview);
 
 export default router;

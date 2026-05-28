@@ -24,8 +24,10 @@ const userSchema = new mongoose.Schema(
         },
         emailOTP: String,
         emailOTPExpiresIn: Date,
+        emailVerificationToken: String,
         photo: {
             type: String,
+            default: 'default.jpg',
         },
         password: {
             type: String,
@@ -81,6 +83,11 @@ userSchema.pre('save', async function () {
     this.passwordConfirm = undefined;
 });
 
+// if email is modified, reset the email confirmation status
+userSchema.pre('save', async function () {
+    if (!this.isModified('email')) return;
+    this.isEmailConfirmed = false;
+});
 userSchema.methods.isCorrectPassword = async function (
     candidatePassword,
     userPassword,
@@ -102,6 +109,14 @@ userSchema.methods.createPasswordResetToken = function () {
         .update(resetToken)
         .digest('hex');
     this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    return resetToken;
+};
+userSchema.methods.createEmailVerificationToken = function () {
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    this.emailVerificationToken = crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex');
     return resetToken;
 };
 userSchema.methods.createEmailOTP = function () {

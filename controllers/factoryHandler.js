@@ -38,7 +38,7 @@ export const getAll = (Model, options = {}, populateOptions = undefined) =>
 
         if (populateOptions) query.populate(populateOptions);
 
-        const documents = await query.query.setOptions(options); // .explain()
+        const documents = await query.query.setOptions(options);
 
         res.status(200).json({
             status: 'success',
@@ -59,27 +59,17 @@ export const createOne = (Model) =>
 
 export const updateOne = (Model) =>
     catchAsync(async (req, res, next) => {
-        const document = await Model.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true,
-            },
-        );
+        const document = await Model.findById(req.params.id);
 
-        if (!document)
-            return next(
-                new AppError(
-                    `No ${Model.modelName.toLowerCase()} With This ID`,
-                    404,
-                ),
-            );
+        if (!document) return next(new AppError(`No document found`, 404));
 
-        res.status(200).json({
-            status: 'success',
-            data: document,
+        Object.keys(req.body).forEach((key) => {
+            document[key] = req.body[key];
         });
+
+        await document.save({ runValidators: true });
+
+        res.status(200).json({ status: 'success', data: document });
     });
 
 export const deleteOne = (Model) =>

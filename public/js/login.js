@@ -53,26 +53,11 @@ export const signup = async (name, email, password, passwordConfirm) => {
         });
 
         if (res.data.status === 'success') {
-            showAlert('success', 'Signup successful! Please check your email to verify your account.');
-            window.setTimeout(() => {
-                location.assign('/verify-email?email=' + email);
-            }, 1500);
-        }
-    } catch (err) {
-        showAlert('error', err.response.data.message);
-    }
-};
-
-export const verifyEmail = async (email, otp) => {
-    try {
-        const res = await axios({
-            method: 'POST',
-            url: '/api/v1/users/verifyEmail',
-            data: { email, otp },
-        });
-
-        if (res.data.status === 'success') {
-            showAlert('success', 'Email verified successfully! You are now logged in.');
+            showAlert(
+                'success',
+                res.data.message ||
+                    'Successfully signed up! Please check your email to verify your account.',
+            );
             window.setTimeout(() => {
                 location.assign('/');
             }, 1500);
@@ -81,19 +66,45 @@ export const verifyEmail = async (email, otp) => {
         showAlert('error', err.response.data.message);
     }
 };
-export const resendVerifyEmail = async (email) => {
+
+export const verifyEmail = async (token, otp) => {
+    try {
+        const res = await axios({
+            method: 'POST',
+            url: `/api/v1/users/verifyEmail/${token}`,
+            data: { otp },
+        });
+
+        if (res.data.status === 'success') {
+            showAlert(
+                'success',
+                'Email verified successfully! You are now logged in.',
+            );
+            window.setTimeout(() => {
+                location.assign('/');
+            }, 1500);
+        }
+    } catch (err) {
+        showAlert('error', err.response.data.message);
+    }
+};
+export const resendVerifyEmail = async () => {
     try {
         const res = await axios({
             method: 'POST',
             url: '/api/v1/users/resendEmailVerification',
-            data: { email },
         });
 
         if (res.data.status === 'success') {
-            showAlert('success', 'Verification email sent! Please check your inbox.');
+            showAlert(
+                'success',
+                res.data.message ||
+                    'Verification email sent! Please check your inbox.',
+            );
         }
     } catch (err) {
         showAlert('error', err.response.data.message);
+        throw err; // Re-throw so the caller can detect failure
     }
 };
 export const forgotPassword = async (email) => {
@@ -120,7 +131,10 @@ export const resetPassword = async (password, passwordConfirm, token) => {
         });
 
         if (res.data.status === 'success') {
-            showAlert('success', 'Password reset successfully! You are now logged in.');
+            showAlert(
+                'success',
+                'Password reset successfully! You are now logged in.',
+            );
             window.setTimeout(() => {
                 location.assign('/');
             }, 1500);

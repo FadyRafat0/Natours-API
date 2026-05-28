@@ -3,4 +3,4 @@ config.env
 theory-lectures.pdf
 project-photo.webp
 testFile.js
-.cache
+.parcel-cache

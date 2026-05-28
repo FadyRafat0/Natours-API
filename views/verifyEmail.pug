@@ -5,12 +5,8 @@ block content
     .login-form
       h2.heading-secondary.ma-bt-lg Verify your email
       form.form.form--verify-email
-        .form__group
-          label.form__label(for='email') Email address
-          input#email.form__input(type='email', placeholder='you@example.com', required, value=`${email}`)
         .form__group.ma-bt-md
           label.form__label(for='otp') One-Time Password (OTP)
           input#otp.form__input(type='text', placeholder='123456', required)
         .form__group
           button.btn.btn--green Verify
-          button.btn.btn--green.resend-btn(type='button', style='margin-left: 1rem; background-color: #777;') Resend OTP

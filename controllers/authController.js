@@ -13,6 +13,7 @@ import { promisify } from 'util'; // to convert callback based function to promi
 
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
@@ -64,8 +65,13 @@ export const authenticateUser = catchAsync(async (req, res, next) => {
         );
     }
 
-    // 5) Check email verfied
-    if (!user.isEmailConfirmed) {
+    // to make the user data available in the next middlewares
+    req.user = user;
+    res.locals.user = user;
+    next();
+});
+export const checkEmailVerified = catchAsync(async (req, res, next) => {
+    if (!req.user.isEmailConfirmed) {
         return next(
             new AppError(
                 'Your email address is not verified. Please verify it to perform this action.',
@@ -73,10 +79,6 @@ export const authenticateUser = catchAsync(async (req, res, next) => {
             ),
         );
     }
-
-    // to make the user data available in the next middlewares
-    req.user = user;
-    res.locals.user = user;
     next();
 });
 // checked if the user logged in , no errors!
@@ -99,9 +101,6 @@ export const isLoggedIn = async (req, res, next) => {
 
         // 4) Check if user changed password after the token was issued
         if (user.changedPasswordAfter(decoded.iat)) return next();
-
-        // 5) Check email verfied
-        if (!user.isEmailConfirmed) return next();
 
         res.locals.user = user;
         next();
@@ -153,29 +152,29 @@ const createSendToken = (user, statusCode, res) => {
 
 // to sign up the user and send the token to client
 export const signup = catchAsync(async (req, res, next) => {
+    console.log(req.body);
     const user = await User.create({
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
         passwordConfirm: req.body.passwordConfirm,
-        role: req.body.role,
     });
 
     const otp = user.createEmailOTP();
     await user.save({ validateBeforeSave: false });
 
-    // send email with otp
-    const URL = `${req.protocol}://${req.get('host')}/verify-email?email=${user.email}`;
+    // Fire email asynchronously — do NOT block the response
+    const URL = `${req.protocol}://${req.get('host')}/verify-email`;
+
     await sendEmail({
         email: user.email,
         subject: 'confirm email with OTP (10 minutes valid)',
         message: `Click the URL: ${URL} , and write the OTP: ${otp}`,
+        html: `<p>Please click this link to verify your email:</p><p><a href="${URL}">${URL}</a></p><p>Your OTP is: <strong>${otp}</strong></p>`,
     });
 
-    res.status(201).json({
-        status: 'success',
-        message: 'Check your email, confirm it with OTP send !',
-    });
+    // Log the user in immediately
+    createSendToken(user, 201, res);
 });
 
 // to login the user and send the token to client
@@ -193,15 +192,20 @@ export const login = catchAsync(async (req, res, next) => {
     const user = await User.findOne({
         email,
     }).select('+password');
-    // console.log(user);
-    if (!user || !(await user.isCorrectPassword(password, user.password))) {
-        return next(new AppError('Wrong Email or password', 401));
+
+    let isCorrectPassword = false;
+    if (user) {
+        isCorrectPassword = await user.isCorrectPassword(
+            password,
+            user.password,
+        );
+    } else {
+        // Prevent timing attack by performing a dummy hash calculation (takes ~100ms)
+        await bcrypt.hash('dummy_password', 12);
     }
 
-    if (!user.isEmailConfirmed) {
-        return next(
-            new AppError('Please confirm your email address to log in', 401),
-        );
+    if (!user || !isCorrectPassword) {
+        return next(new AppError('Wrong Email or password', 401));
     }
 
     createSendToken(user, 200, res);
@@ -262,6 +266,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
             email: user.email,
             subject: 'Reset Password (10 minutes valid)',
             message,
+            html: `<p>Forgot your password?</p><p>Please click this link to reset your password:</p><p><a href="${resetURL}">${resetURL}</a></p><p>If you didn't forget your password, please ignore this email.</p>`,
         });
 
         res.status(200).json({
@@ -329,58 +334,71 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
 // EMAIL Operations (verify, resend verification)
 export const verifyEmail = catchAsync(async (req, res, next) => {
-    const { email, otp } = req.body;
-    const user = await User.findOne({ email: email });
+    const { otp } = req.body;
 
-    // No user with this email
-    if (!user) return next(new AppError('Wrong Email !', 400));
+    if (!otp) return next(new AppError('Please provide the OTP', 400));
 
-    // Email already confirmed
-    if (user.isEmailConfirmed) {
-        return next(
-            new AppError('This email already verified, Please log in', 400),
-        );
+    const { token } = req.params;
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({ emailVerificationToken: hashedToken });
+
+    const genericError = new AppError('Invalid or expired OTP', 401);
+
+    if (!user || user.isEmailConfirmed) {
+        return next(genericError);
     }
 
     // Check the OTP correctness & expiration
     const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
     if (hashedOTP !== user.emailOTP || user.emailOTPExpiresIn <= Date.now()) {
-        return next(new AppError('Wrong or Expired OTP, try again later', 400));
+        return next(genericError);
     }
 
     user.isEmailConfirmed = true;
     user.emailOTP = undefined;
     user.emailOTPExpiresIn = undefined;
-    await user.save({ validateBeforeSave: false }); // Save the changes
+    await user.save({ validateBeforeSave: false });
 
     createSendToken(user, 200, res);
 });
 export const resendEmailVerification = catchAsync(async (req, res, next) => {
-    const { email } = req.body;
-    const user = await User.findOne({ email: email });
-    if (!user) return next(new AppError('Wrong Email !', 400));
-
-    // Email already confirmed
-    if (user.isEmailConfirmed) {
-        return next(
-            new AppError('This email already verified, Please log in', 400),
-        );
+    if (req.user.isEmailConfirmed) {
+        return res.status(200).json({
+            status: 'success',
+            message: 'Email Already Confirmed!',
+        });
     }
 
-    // Make the otp & save it in DB
+    const user = await User.findById(req.user.id);
+    // Make the otp & email token save them in DB
     const otp = user.createEmailOTP();
+    const token = user.createEmailVerificationToken();
     await user.save({ validateBeforeSave: false });
 
     // Send email
-    const URL = `${req.protocol}://${req.get('host')}/verify-email?email=${user.email}`;
-    await sendEmail({
-        email: user.email,
-        subject: 'Your NEW OTP (10 minutes valid)',
-        message: `Click the URL: ${URL} , and write the OTP: ${otp}`,
-    });
+    const URL = `${req.protocol}://${req.get('host')}/verify-email/${token}`;
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'Your NEW OTP (10 minutes valid)',
+            message: `Click the URL: ${URL} , and write the OTP: ${otp}`,
+            html: `<p>Please click this link to verify your email:</p><p><a href="${URL}">${URL}</a></p><p>Your NEW OTP is: <strong>${otp}</strong></p>`,
+        });
 
-    res.status(200).json({
-        status: 'success',
-        message: 'Check your email !',
-    });
+        res.status(200).json({
+            status: 'success',
+            message: 'OTP sent to email! Please check your inbox.',
+        });
+    } catch (err) {
+        user.emailOTP = undefined;
+        user.emailVerificationToken = undefined;
+        user.emailOTPExpiresIn = undefined;
+        await user.save({ validateBeforeSave: false });
+        return next(
+            new AppError(
+                'There was an error sending the email. Try again later!',
+                500,
+            ),
+        );
+    }
 });
