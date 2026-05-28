@@ -41,9 +41,9 @@ const reviewSchema = new mongoose.Schema(
 
 reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
-// populate Tour, User
+// OPTIONS: populate Tour, User
 reviewSchema.pre(/^find/, function () {
-    const options = this.getOptions();
+    const options = this.getOptions() || {};
 
     if (options.populateTour) {
         this.populate({

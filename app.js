@@ -5,10 +5,12 @@ import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import hpp from 'hpp';
+import cookieParser from 'cookie-parser';
 
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import reviewRouter from './routes/reviewRouter.js';
+import viewRouter from './routes/viewRouter.js';
 import AppError from './utils/appError.js';
 import errorHanlder from './controllers/errorController.js';
 
@@ -16,8 +18,37 @@ import errorHanlder from './controllers/errorController.js';
 const dirname = import.meta.dirname;
 const app = express();
 
-// Set security HTTP headers
-app.use(helmet());
+app.set('view engine', 'pug');
+app.set('views', './views');
+
+// Set security HTTP headers with relaxed CSP for required external assets
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'"],
+                styleSrc: [
+                    "'self'",
+                    'https://fonts.googleapis.com',
+                    "'unsafe-inline'",
+                ],
+                connectSrc: [
+                    "'self'",
+                    'ws://127.0.0.1:11406',
+                    'http://127.0.0.1:11406',
+                ],
+                imgSrc: [
+                    "'self'",
+                    'data:',
+                    'blob:',
+                    'https://*.tile.openstreetmap.org',
+                ],
+                fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+            },
+        },
+    }),
+);
 
 // to convert brackets in the URL into nested objects.
 app.set('query parser', 'extended');
@@ -37,6 +68,7 @@ app.use('/api', limiter);
 
 // Body parser, reading data from body to req.body
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
 
 // Make req.query writable again so the sanitizer doesn't crash
 app.use((req, res, next) => {
@@ -64,13 +96,14 @@ app.use(express.static(`${dirname}/public`));
 // Test Middleware
 app.use((req, res, next) => {
     req.requestTime = new Date();
+    console.log(req.cookies);
     next();
 });
 
-// Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/', viewRouter);
 
 app.all(/.*/, (req, res, next) => {
     next(new AppError(`Cannot access ${req.originalUrl} In This Server`, 404));

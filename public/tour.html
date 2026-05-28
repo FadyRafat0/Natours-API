@@ -14,11 +14,11 @@
 
         <title>Natours | The Park Camper Tour</title>
 
-        <script src="https://api.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
         <link
-            href="https://api.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css"
             rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     </head>
     <body>
         <header class="header">
@@ -211,124 +211,117 @@
         <section class="section-map">
             <div id="map"></div>
             <script>
-                mapboxgl.accessToken = 'literally-anything-just-fake-text';
-
-                const geojson = {
-                    type: 'FeatureCollection',
-                    features: [
-                        {
-                            type: 'Feature',
-                            geometry: {
-                                type: 'Point',
-                                coordinates: [-112.987418, 37.198125],
-                            },
-                            properties: {
-                                description: 'Zion Canyon National Park',
-                            },
-                        },
-                        {
-                            type: 'Feature',
-                            geometry: {
-                                type: 'Point',
-                                coordinates: [-111.376161, 36.86438],
-                            },
-                            properties: {
-                                description: 'Antelope Canyon',
-                            },
-                        },
-                        {
-                            type: 'Feature',
-                            geometry: {
-                                type: 'Point',
-                                coordinates: [-112.115763, 36.058973],
-                            },
-                            properties: {
-                                description: 'Grand Canyon National Park',
-                            },
-                        },
-                        {
-                            type: 'Feature',
-                            geometry: {
-                                type: 'Point',
-                                coordinates: [-116.107963, 34.011646],
-                            },
-                            properties: {
-                                description: 'Joshua Tree National Park',
-                            },
-                        },
-                    ],
-                };
-
-                const map = new mapboxgl.Map({
-                    container: 'map',
-                    style: 'mapbox://styles/jonasschmedtmann/cjnxfn3zk7bj52rpegdltx58h',
-                    scrollZoom: false,
-                });
-
-                const bounds = new mapboxgl.LngLatBounds();
-
-                geojson.features.forEach(function (marker) {
-                    var el = document.createElement('div');
-                    el.className = 'marker';
-
-                    new mapboxgl.Marker({
-                        element: el,
-                        anchor: 'bottom',
-                    })
-                        .setLngLat(marker.geometry.coordinates)
-                        .addTo(map);
-
-                    new mapboxgl.Popup({
-                        offset: 30,
-                        closeOnClick: false,
-                    })
-                        .setLngLat(marker.geometry.coordinates)
-                        .setHTML('<p>' + marker.properties.description + '</p>')
-                        .addTo(map);
-
-                    bounds.extend(marker.geometry.coordinates);
-                });
-
-                map.fitBounds(bounds, {
-                    padding: {
-                        top: 200,
-                        bottom: 150,
-                        left: 50,
-                        right: 50,
-                    },
-                });
-
-                map.on('load', function () {
-                    map.addLayer({
-                        id: 'route',
-                        type: 'line',
-                        source: {
-                            type: 'geojson',
-                            data: {
+                (function () {
+                    const geojson = {
+                        type: 'FeatureCollection',
+                        features: [
+                            {
                                 type: 'Feature',
-                                properties: {},
                                 geometry: {
-                                    type: 'LineString',
-                                    coordinates: [
-                                        [-112.987418, 37.198125],
-                                        [-111.376161, 36.86438],
-                                        [-112.115763, 36.058973],
-                                        [-116.107963, 34.011646],
-                                    ],
+                                    type: 'Point',
+                                    coordinates: [-112.987418, 37.198125],
+                                },
+                                properties: {
+                                    description: 'Zion Canyon National Park',
                                 },
                             },
+                            {
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: [-111.376161, 36.86438],
+                                },
+                                properties: {
+                                    description: 'Antelope Canyon',
+                                },
+                            },
+                            {
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: [-112.115763, 36.058973],
+                                },
+                                properties: {
+                                    description: 'Grand Canyon National Park',
+                                },
+                            },
+                            {
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: [-116.107963, 34.011646],
+                                },
+                                properties: {
+                                    description: 'Joshua Tree National Park',
+                                },
+                            },
+                        ],
+                    };
+
+                    // Initialize Leaflet map
+                    const map = L.map('map', { scrollWheelZoom: false });
+
+                    // Add OpenStreetMap tile layer
+                    L.tileLayer(
+                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        {
+                            attribution:
+                                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                         },
-                        layout: {
-                            'line-join': 'round',
-                            'line-cap': 'round',
-                        },
-                        paint: {
-                            'line-color': '#55c57a',
-                            'line-opacity': 0.6,
-                            'line-width': 3,
-                        },
+                    ).addTo(map);
+
+                    const points = [];
+
+                    // Add markers (flip [lng, lat] -> [lat, lng])
+                    geojson.features.forEach(function (marker) {
+                        var el = document.createElement('div');
+                        el.className = 'marker';
+
+                        const coords = marker.geometry.coordinates; // [lng, lat]
+                        const latlng = [coords[1], coords[0]]; // [lat, lng]
+
+                        var customIcon = L.divIcon({
+                            className: 'marker',
+                            iconSize: [32, 40],
+                            iconAnchor: [16, 40],
+                            popupAnchor: [0, -30],
+                        });
+
+                        L.marker(latlng, { icon: customIcon })
+                            .addTo(map)
+                            .bindPopup(
+                                '<p>' + marker.properties.description + '</p>',
+                                {
+                                    autoClose: false,
+                                    closeOnClick: false,
+                                    className: 'leaflet-popup',
+                                },
+                            )
+                            .openPopup();
+
+                        points.push(latlng);
                     });
-                });
+
+                    if (points.length) {
+                        map.fitBounds(points, {
+                            padding: [100, 100],
+                        });
+                    }
+
+                    // Add route polyline (flip each coordinate pair)
+                    const routeCoords = geojson.features.map(function (f) {
+                        return [
+                            f.geometry.coordinates[1],
+                            f.geometry.coordinates[0],
+                        ];
+                    });
+
+                    L.polyline(routeCoords, {
+                        color: '#55c57a',
+                        opacity: 0.6,
+                        weight: 3,
+                    }).addTo(map);
+                })();
             </script>
         </section>
 

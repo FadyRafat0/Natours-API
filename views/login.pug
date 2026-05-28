@@ -1,0 +1,19 @@
+extends base
+
+block content
+  main.main
+    .login-form
+      h2.heading-secondary.ma-bt-lg Log into your account
+      form.form.form--login
+        .form__group
+          label.form__label(for='email') Email address
+          input#email.form__input(type='email', placeholder='you@example.com', required)
+        .form__group.ma-bt-md
+          label.form__label(for='password') Password
+          input#password.form__input(type='password', placeholder='••••••••', required, minlength='8')
+        .form__group
+          button.btn.btn--green Login
+          div(style='margin-top: 1.5rem;')
+            a.btn-text(href='/forgot-password' style='font-size: 1.4rem; padding-bottom: 2px;') Forgot Password?
+            span(style='margin: 0 1rem; color: #777;') |
+            a.btn-text(href='/verify-email' style='font-size: 1.4rem; padding-bottom: 2px;') Resend Verification Email

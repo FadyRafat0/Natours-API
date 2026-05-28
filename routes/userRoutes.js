@@ -10,6 +10,9 @@ router.post('/resendEmailVerification', authController.resendEmailVerification);
 router.patch('/resetPassword/:token', authController.resetPassword);
 router.post('/forgotPassword', authController.forgotPassword);
 
+// post not get to avoid pre-fetching by the browser problem
+router.post('/logout', authController.logout);
+
 // Need to confirm the email
 router.post('/login', authController.login);
 

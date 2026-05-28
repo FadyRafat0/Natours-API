@@ -26,6 +26,8 @@ export const authenticateUser = catchAsync(async (req, res, next) => {
     let token = undefined;
     if (authorization && authorization.startsWith('Bearer')) {
         token = authorization.split(' ')[1];
+    } else if (req.cookies.jwt) {
+        token = req.cookies.jwt;
     }
 
     if (!token) {
@@ -74,8 +76,39 @@ export const authenticateUser = catchAsync(async (req, res, next) => {
 
     // to make the user data available in the next middlewares
     req.user = user;
+    res.locals.user = user;
     next();
 });
+// checked if the user logged in , no errors!
+export const isLoggedIn = async (req, res, next) => {
+    try {
+        let token = req.cookies.jwt;
+
+        // 1) check if the token exist
+        if (!token) return next();
+
+        // 2) Check if the token is valid
+        const decoded = await promisify(jwt.verify)(
+            token,
+            process.env.JWT_SECRET,
+        );
+
+        // 3) Check if the user still exists
+        const user = await User.findById(decoded.id);
+        if (!user) return next();
+
+        // 4) Check if user changed password after the token was issued
+        if (user.changedPasswordAfter(decoded.iat)) return next();
+
+        // 5) Check email verfied
+        if (!user.isEmailConfirmed) return next();
+
+        res.locals.user = user;
+        next();
+    } catch (err) {
+        next();
+    }
+};
 // to restrict the access to certain routes based on user role
 export const authorizeRoles = (...roles) => {
     return (req, res, next) => {
@@ -132,7 +165,7 @@ export const signup = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // send email with otp
-    const URL = `${req.protocol}://${req.get('host')}/api/v1/users/verifyEmail`;
+    const URL = `${req.protocol}://${req.get('host')}/verify-email?email=${user.email}`;
     await sendEmail({
         email: user.email,
         subject: 'confirm email with OTP (10 minutes valid)',
@@ -173,6 +206,13 @@ export const login = catchAsync(async (req, res, next) => {
 
     createSendToken(user, 200, res);
 });
+export const logout = (req, res) => {
+    res.cookie('jwt', 'loggedout', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true,
+    });
+    res.status(200).json({ status: 'success' });
+};
 
 // PASSWORD Operations (Update, Forgot, Reset)
 export const updatePassword = catchAsync(async (req, res, next) => {
@@ -213,7 +253,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // 3) Send the token into the user email
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+    const resetURL = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
 
     const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email`;
 
@@ -332,7 +372,7 @@ export const resendEmailVerification = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // Send email
-    const URL = `${req.protocol}://${req.get('host')}/api/v1/users/verifyEmail`;
+    const URL = `${req.protocol}://${req.get('host')}/verify-email?email=${user.email}`;
     await sendEmail({
         email: user.email,
         subject: 'Your NEW OTP (10 minutes valid)',

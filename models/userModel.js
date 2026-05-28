@@ -117,5 +117,18 @@ userSchema.methods.createEmailOTP = function () {
     return otp;
 };
 
+// OPTIONS: populateReviews
+userSchema.pre(/^find/, function () {
+    const options = this.getOptions() || {};
+
+    if (options.populateReviews) {
+        this.populate({
+            path: 'reviews',
+            select: 'tour review rating',
+            options: { populateTour: true },
+        });
+    }
+});
+
 const User = mongoose.model('User', userSchema);
 export default User;

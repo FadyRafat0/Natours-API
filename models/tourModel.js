@@ -27,7 +27,7 @@ const tourSchema = new mongoose.Schema(
         },
         nameSlug: {
             type: String,
-            default: 'Just A Default Value',
+            default: 'no-name',
         },
         price: {
             type: Number,
@@ -143,12 +143,21 @@ tourSchema.pre('save', async function () {
 //     this.find({ secretTour: { $ne: true } });
 // });
 
+// OPTIONS: populateGuides | populateReviews
 tourSchema.pre(/^find/, function () {
-    const options = this.getOptions();
+    const options = this.getOptions() || {};
     if (options.populateGuides) {
         this.populate({
             path: 'guides',
             select: '-__v -passwordChangedAt',
+        });
+    }
+
+    if (options.populateReviews) {
+        this.populate({
+            path: 'reviews',
+            select: 'review rating user',
+            options: { populateUser: true },
         });
     }
 });
