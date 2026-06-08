@@ -1,9 +1,6 @@
 import express from 'express';
-import multer from 'multer';
 import * as userController from '../controllers/userController.js';
 import * as authController from '../controllers/authController.js';
-
-const upload = multer({ dest: '/public/img/users' });
 
 const router = express.Router();
 
@@ -26,10 +23,13 @@ router
     .route('/me')
     .all(userController.setUserId)
     .get(userController.getUser)
+    // updateCheck before resizing the user photo and save it in the files
     .patch(
-        userController.updateCheck,
-        upload.single('photo'),
-        userController.updateUser,
+        userController.uploadPhoto,
+        // name , email (photo if exist is handled via multer file otherwise undefined)
+        userController.filterAllowedUpdates('name', 'email'),
+        userController.resizePhoto,
+        userController.updateMe,
     )
     .delete(userController.deleteUser);
 

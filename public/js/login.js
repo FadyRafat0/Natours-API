@@ -53,11 +53,7 @@ export const signup = async (name, email, password, passwordConfirm) => {
         });
 
         if (res.data.status === 'success') {
-            showAlert(
-                'success',
-                res.data.message ||
-                    'Successfully signed up! Please check your email to verify your account.',
-            );
+            showAlert('success', res.data.message || 'Successfully signed up!');
             window.setTimeout(() => {
                 location.assign('/');
             }, 1500);

@@ -1,35 +1,29 @@
 import express from 'express';
 import * as viewController from './../controllers/viewController.js';
 import * as authController from './../controllers/authController.js';
+import * as bookController from './../controllers/bookingController.js';
 
 const router = express.Router();
 
 router.use(authController.isLoggedIn);
 
-router.get('/', authController.isLoggedIn, viewController.getOverview);
 router.get(
-    '/tour/:nameSlug',
-    authController.isLoggedIn,
-    viewController.getTour,
+    '/',
+    bookController.createBookingCheckout,
+    viewController.getOverview,
 );
-router.get('/login', authController.isLoggedIn, viewController.getLoginForm);
-router.get('/signup', authController.isLoggedIn, viewController.getSignupForm);
-router.get(
-    '/verify-email/:token',
-    authController.isLoggedIn,
-    viewController.getVerifyEmailForm,
-);
-router.get(
-    '/forgot-password',
-    authController.isLoggedIn,
-    viewController.getForgotPasswordForm,
-);
-router.get(
-    '/reset-password/:token',
-    authController.isLoggedIn,
-    viewController.getResetPasswordForm,
-);
+router.get('/tour/:nameSlug', viewController.getTour);
+router.get('/login', viewController.getLoginForm);
+router.get('/signup', viewController.getSignupForm);
+router.get('/verify-email/:token', viewController.getVerifyEmailForm);
+router.get('/forgot-password', viewController.getForgotPasswordForm);
+router.get('/reset-password/:token', viewController.getResetPasswordForm);
 
 router.get('/me', authController.authenticateUser, viewController.getAccount);
+router.get(
+    '/my-tours',
+    authController.authenticateUser,
+    viewController.getMyTours,
+);
 
 export default router;

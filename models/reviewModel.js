@@ -61,7 +61,7 @@ reviewSchema.pre(/^find/, function () {
 });
 
 // this points to current model O(N) Way
-reviewSchema.statics.calculateAveragaRatings = async function (tourId) {
+reviewSchema.statics.calculateAverageRatings = async function (tourId) {
     const stats = await this.aggregate([
         {
             $match: { tour: tourId },
@@ -90,11 +90,11 @@ reviewSchema.statics.calculateAveragaRatings = async function (tourId) {
 };
 
 reviewSchema.post('save', function () {
-    this.constructor.calculateAveragaRatings(this.tour);
+    this.constructor.calculateAverageRatings(this.tour);
 });
 reviewSchema.post(/^findOneAnd/, async function (doc) {
     if (doc) {
-        await doc.constructor.calculateAveragaRatings(doc.tour);
+        await doc.constructor.calculateAverageRatings(doc.tour);
     }
 });
 

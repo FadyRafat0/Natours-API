@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema(
             default: false,
         },
         emailOTP: String,
-        emailOTPExpiresIn: Date,
+        emailOTPExpiresAt: Date,
         emailVerificationToken: String,
         photo: {
             type: String,
@@ -88,6 +88,31 @@ userSchema.pre('save', async function () {
     if (!this.isModified('email')) return;
     this.isEmailConfirmed = false;
 });
+userSchema.pre('findOneAndUpdate', function () {
+    const update = this.getUpdate();
+
+    const isEmailBeingUpdated =
+        update.email || (update.$set && update.$set.email);
+
+    if (isEmailBeingUpdated) {
+        this.set({ isEmailConfirmed: false });
+    }
+});
+
+// OPTIONS: populateReviews
+userSchema.pre(/^find/, function () {
+    const options = this.getOptions() || {};
+
+    if (options.populateReviews) {
+        this.populate({
+            path: 'reviews',
+            select: 'tour review rating',
+            options: { populateTour: true },
+        });
+    }
+});
+
+// DOC FUNCTIONS:
 userSchema.methods.isCorrectPassword = async function (
     candidatePassword,
     userPassword,
@@ -131,19 +156,6 @@ userSchema.methods.createEmailOTP = function () {
     this.emailOTPExpiresIn = Date.now() + 10 * 60 * 1000; // 10 minutes
     return otp;
 };
-
-// OPTIONS: populateReviews
-userSchema.pre(/^find/, function () {
-    const options = this.getOptions() || {};
-
-    if (options.populateReviews) {
-        this.populate({
-            path: 'reviews',
-            select: 'tour review rating',
-            options: { populateTour: true },
-        });
-    }
-});
 
 const User = mongoose.model('User', userSchema);
 export default User;

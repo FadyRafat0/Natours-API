@@ -18,6 +18,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
+import Email from '../utils/email.js';
 import sendEmail from '../utils/email.js';
 
 // to protect the routes that only logged in users can access
@@ -152,7 +153,7 @@ const createSendToken = (user, statusCode, res) => {
 
 // to sign up the user and send the token to client
 export const signup = catchAsync(async (req, res, next) => {
-    console.log(req.body);
+    // console.log(req.body);
     const user = await User.create({
         name: req.body.name,
         email: req.body.email,
@@ -160,18 +161,10 @@ export const signup = catchAsync(async (req, res, next) => {
         passwordConfirm: req.body.passwordConfirm,
     });
 
-    const otp = user.createEmailOTP();
-    await user.save({ validateBeforeSave: false });
-
     // Fire email asynchronously — do NOT block the response
-    const URL = `${req.protocol}://${req.get('host')}/verify-email`;
-
-    await sendEmail({
-        email: user.email,
-        subject: 'confirm email with OTP (10 minutes valid)',
-        message: `Click the URL: ${URL} , and write the OTP: ${otp}`,
-        html: `<p>Please click this link to verify your email:</p><p><a href="${URL}">${URL}</a></p><p>Your OTP is: <strong>${otp}</strong></p>`,
-    });
+    const url = `${req.protocol}://${req.get('host')}/me`;
+    // Send welcome email without awaiting to avoid delaying signup response
+    new Email(user, url).sendWelcome();
 
     // Log the user in immediately
     createSendToken(user, 201, res);
@@ -256,18 +249,11 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
-    // 3) Send the token into the user email
-    const resetURL = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
-
-    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email`;
-
     try {
-        await sendEmail({
-            email: user.email,
-            subject: 'Reset Password (10 minutes valid)',
-            message,
-            html: `<p>Forgot your password?</p><p>Please click this link to reset your password:</p><p><a href="${resetURL}">${resetURL}</a></p><p>If you didn't forget your password, please ignore this email.</p>`,
-        });
+        // 3) Send the token into the user email
+        const resetURL = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
+
+        await new Email(user, resetURL).sendPasswordReset();
 
         res.status(200).json({
             status: 'success',
@@ -322,7 +308,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     if (!user.isEmailConfirmed) {
         user.isEmailConfirmed = true;
         user.emailOTP = undefined;
-        user.emailOTPExpiresIn = undefined;
+        user.emailOTPExpiresAt = undefined;
     }
 
     // 4) Save with validation ON so Mongoose checks the passwords match
@@ -350,13 +336,13 @@ export const verifyEmail = catchAsync(async (req, res, next) => {
 
     // Check the OTP correctness & expiration
     const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
-    if (hashedOTP !== user.emailOTP || user.emailOTPExpiresIn <= Date.now()) {
+    if (hashedOTP !== user.emailOTP || user.emailOTPExpiresAt <= Date.now()) {
         return next(genericError);
     }
 
     user.isEmailConfirmed = true;
     user.emailOTP = undefined;
-    user.emailOTPExpiresIn = undefined;
+    user.emailOTPExpiresAt = undefined;
     await user.save({ validateBeforeSave: false });
 
     createSendToken(user, 200, res);
@@ -376,14 +362,9 @@ export const resendEmailVerification = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // Send email
-    const URL = `${req.protocol}://${req.get('host')}/verify-email/${token}`;
+    const url = `${req.protocol}://${req.get('host')}/verify-email/${token}`;
     try {
-        await sendEmail({
-            email: user.email,
-            subject: 'Your NEW OTP (10 minutes valid)',
-            message: `Click the URL: ${URL} , and write the OTP: ${otp}`,
-            html: `<p>Please click this link to verify your email:</p><p><a href="${URL}">${URL}</a></p><p>Your NEW OTP is: <strong>${otp}</strong></p>`,
-        });
+        await new Email(user, url).sendEmailVerification(otp);
 
         res.status(200).json({
             status: 'success',
@@ -392,7 +373,7 @@ export const resendEmailVerification = catchAsync(async (req, res, next) => {
     } catch (err) {
         user.emailOTP = undefined;
         user.emailVerificationToken = undefined;
-        user.emailOTPExpiresIn = undefined;
+        user.emailOTPExpiresAt = undefined;
         await user.save({ validateBeforeSave: false });
         return next(
             new AppError(

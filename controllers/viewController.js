@@ -1,5 +1,6 @@
 import Tour from './../models/tourModel.js';
 import User from './../models/userModel.js';
+import Booking from './../models/bookingModel.js';
 import catchAsync from './../utils/catchAsync.js';
 import AppError from './../utils/appError.js';
 
@@ -58,5 +59,12 @@ export const getResetPasswordForm = catchAsync(async (req, res, next) => {
     res.status(200).render('resetPassword', {
         title: `Reset Password`,
         token: req.params.token,
+    });
+});
+export const getMyTours = catchAsync(async (req, res, next) => {
+    const bookings = await Booking.find({ user: req.user.id });
+    res.status(200).render('overview', {
+        titile: 'My Tours',
+        tours: bookings.map((booking) => booking.tour),
     });
 });

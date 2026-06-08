@@ -132,17 +132,6 @@ tourSchema.pre('save', async function () {
 //     this.guides = await Promise.all(guidesPromises);
 // });
 
-// POST is called after saving the doc in DB
-// tourSchema.post('save', function (doc, next) {
-//     console.log(`From POST 1`);
-//     next();
-// });
-
-// QUERY MIDDLEWARE
-// tourSchema.pre(/^find/, function () {
-//     this.find({ secretTour: { $ne: true } });
-// });
-
 // OPTIONS: populateGuides | populateReviews
 tourSchema.pre(/^find/, function () {
     const options = this.getOptions() || {};
@@ -161,12 +150,6 @@ tourSchema.pre(/^find/, function () {
         });
     }
 });
-
-// AGGREGATON MIDDLEWARE
-// tourSchema.pre('aggregate', function () {
-//     this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-//     console.log(this.pipeline());
-// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 

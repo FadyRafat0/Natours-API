@@ -31,6 +31,8 @@ router
     .post(
         authController.authenticateUser,
         authController.authorizeRoles('admin', 'lead-guide'),
+        tourController.uploadImages,
+        tourController.resizeImages,
         tourController.createTour,
     );
 
@@ -40,6 +42,8 @@ router
     .patch(
         authController.authenticateUser,
         authController.authorizeRoles('admin', 'lead-guide'),
+        tourController.uploadImages,
+        tourController.resizeImages,
         tourController.updateTour,
     )
     .delete(

@@ -59,15 +59,22 @@ export const createOne = (Model) =>
 
 export const updateOne = (Model) =>
     catchAsync(async (req, res, next) => {
-        const document = await Model.findById(req.params.id);
+        const document = await Model.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            {
+                returnDocument: 'after',
+                runValidators: true,
+            },
+        );
 
-        if (!document) return next(new AppError(`No document found`, 404));
-
-        Object.keys(req.body).forEach((key) => {
-            document[key] = req.body[key];
-        });
-
-        await document.save({ runValidators: true });
+        if (!document)
+            return next(
+                new AppError(
+                    `No ${Model.modelName.toLowerCase()} With This ID`,
+                    404,
+                ),
+            );
 
         res.status(200).json({ status: 'success', data: document });
     });
