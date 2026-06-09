@@ -29,15 +29,13 @@ app.set('trust proxy', 1);
 // Implement CORS — allow any localhost port (Vite may use 5173, 5174, etc.)
 const corsOptions = {
     origin: (origin, callback) => {
-            // Allow requests with no origin (Postman, curl) or any localhost origin, plus the production frontend URL
-            const allowedOrigins = [/^http:\/\/localhost(:\d+)?$/];
+        // Allow requests with no origin (Postman, curl) or any localhost origin, plus the production frontend URL
+        const allowedOrigins = [/^http:\/\/localhost(:\d+)?$/];
         if (process.env.FRONTEND_URL) {
-                allowedOrigins.push(
-                    new RegExp(`^${process.env.FRONTEND_URL}$`),
-            );
+            allowedOrigins.push(new RegExp(`^${process.env.FRONTEND_URL}$`));
         }
 
-            if (!origin || allowedOrigins.some((regex) => regex.test(origin))) {
+        if (!origin || allowedOrigins.some((regex) => regex.test(origin))) {
             callback(null, true);
         } else {
             callback(new Error(`CORS blocked: ${origin}`));
@@ -47,7 +45,7 @@ const corsOptions = {
 };
 
 // Handle preflight OPTIONS requests explicitly (critical for Vercel serverless)
-app.options('*', cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(cors(corsOptions));
 
 // Set security HTTP headers with relaxed CSP for required external assets
@@ -103,6 +101,7 @@ const limiter = rateLimit({
     limit: 1000,
     windowMs: 60 * 60 * 1000,
     message: 'Too many requests, try again in 1 hour',
+    validate: { xForwardedForHeader: false, forwardedHeader: false }
 });
 app.use('/api', limiter);
 
