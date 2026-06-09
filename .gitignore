@@ -1,5 +1,5 @@
 node_modules
-config.env
+backend/config.env
 theory-lectures.pdf
 project-photo.webp
 testFile.js
