@@ -56,6 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     const res = await API.post('/users/login', { email, password });
+    localStorage.setItem('jwt', res.data.token);
     setUser(res.data.data);
   };
 
@@ -71,11 +72,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password,
       passwordConfirm,
     });
+    localStorage.setItem('jwt', res.data.token);
     setUser(res.data.data);
   };
 
   const logout = async () => {
     await API.post('/users/logout');
+    localStorage.removeItem('jwt');
     setUser(null);
   };
 
