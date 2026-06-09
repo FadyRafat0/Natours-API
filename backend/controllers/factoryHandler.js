@@ -30,6 +30,9 @@ export const getAll = (Model, options = {}, populateOptions = undefined) =>
         let filter = {};
         if (req.filterObj) filter = req.filterObj;
 
+        const featuresForTotal = new APIFeatures(Model.find(filter), req.query).filter();
+        const totalDocuments = await featuresForTotal.query.countDocuments();
+
         const query = new APIFeatures(Model.find(filter), req.query)
             .filter()
             .sort()
@@ -43,6 +46,7 @@ export const getAll = (Model, options = {}, populateOptions = undefined) =>
         res.status(200).json({
             status: 'success',
             results: documents.length,
+            totalResults: totalDocuments,
             timeToRespond: Date.now() - req.requestTime,
             data: documents,
         });
