@@ -16,8 +16,11 @@ import bookingRouter from './routes/bookingRouter.js';
 import AppError from './utils/appError.js';
 import errorHanlder from './controllers/errorController.js';
 
-// eslint-disable-next-line prefer-destructuring
-const dirname = import.meta.dirname;
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 
 // Implement CORS — allow any localhost port (Vite may use 5173, 5174, etc.)
@@ -121,7 +124,7 @@ app.use(xss());
 app.use(hpp());
 
 // Serving static files, public folder become the root
-app.use(express.static(`${dirname}/public`));
+app.use(express.static(`${__dirname}/public`));
 
 // Compress all responses
 app.use(compression());
