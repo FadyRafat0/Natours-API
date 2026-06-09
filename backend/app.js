@@ -7,7 +7,7 @@ import xss from 'xss-clean';
 import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import compression from 'compression';
+// import compression from 'compression';
 
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
@@ -30,7 +30,9 @@ app.use(
             // Allow requests with no origin (Postman, curl) or any localhost origin, plus the production frontend URL
             const allowedOrigins = [/^http:\/\/localhost(:\d+)?$/];
             if (process.env.FRONTEND_URL) {
-                allowedOrigins.push(new RegExp(`^${process.env.FRONTEND_URL}$`));
+                allowedOrigins.push(
+                    new RegExp(`^${process.env.FRONTEND_URL}$`),
+                );
             }
 
             if (!origin || allowedOrigins.some((regex) => regex.test(origin))) {
@@ -127,7 +129,7 @@ app.use(hpp());
 app.use(express.static(`${__dirname}/public`));
 
 // Compress all responses
-app.use(compression());
+// app.use(compression());
 
 // Test Middleware
 app.use((req, res, next) => {
