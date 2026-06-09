@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../api';
-import type { Tour as TourType, Review } from '../types';
+import type { Tour as TourType } from '../types';
 import { tourImg, userImg, formatDate } from '../utils/helpers';
 import { useAuth } from '../context/AuthContext';
 import Mapbox from '../components/Mapbox';

@@ -84,13 +84,11 @@ export const aliasTopTours = (req, res, next) => {
 
 export const getAllTours = factoryHandler.getAll(
     Tour,
-    { populateGuides: true },
-    { populateReviews: true },
+    { populateGuides: true, populateReviews: true }
 );
 export const getTour = factoryHandler.getOne(
     Tour,
-    { populateGuides: true },
-    { path: 'reviews', options: { populateUser: true } },
+    { populateGuides: true, populateReviews: true }
 );
 export const createTour = factoryHandler.createOne(Tour);
 export const updateTour = factoryHandler.updateOne(Tour);

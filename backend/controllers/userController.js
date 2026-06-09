@@ -77,12 +77,7 @@ export const filterAllowedUpdates = (...allowedFields) => {
 
 export const getUser = factoryHandler.getOne(
     User,
-    {},
-    // populate reviews of the user and tour of the review
-    {
-        path: 'reviews',
-        options: { populateTour: true },
-    },
+    { populateReviews: true }
 );
 
 export const getAllUsers = factoryHandler.getAll(User);
