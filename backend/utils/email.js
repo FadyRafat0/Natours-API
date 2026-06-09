@@ -1,11 +1,9 @@
 import nodemailer from 'nodemailer';
 import * as htmlToText from 'html-to-text';
-import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
 
-import WelcomeEmail from './emails/WelcomeEmail.js';
-import PasswordResetEmail from './emails/PasswordResetEmail.js';
-import EmailVerification from './emails/EmailVerification.js';
+import welcomeEmail from './emails/WelcomeEmail.js';
+import passwordResetEmail from './emails/PasswordResetEmail.js';
+import emailVerification from './emails/EmailVerification.js';
 
 class Email {
     constructor(user, url) {
@@ -41,11 +39,11 @@ class Email {
     async send(templateName, subject, data = {}) {
         let html;
         if (templateName === 'welcome') {
-            html = renderToStaticMarkup(React.createElement(WelcomeEmail, { firstName: this.firstName, url: this.url }));
+            html = welcomeEmail(this.firstName, this.url);
         } else if (templateName === 'passwordReset') {
-            html = renderToStaticMarkup(React.createElement(PasswordResetEmail, { firstName: this.firstName, url: this.url }));
+            html = passwordResetEmail(this.firstName, this.url);
         } else if (templateName === 'emailVerification') {
-            html = renderToStaticMarkup(React.createElement(EmailVerification, { firstName: this.firstName, url: this.url, otp: data.otp }));
+            html = emailVerification(this.firstName, data.otp);
         } else {
             throw new Error('Email template not found!');
         }

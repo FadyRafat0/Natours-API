@@ -19,7 +19,6 @@ import User from '../models/userModel.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
 import Email from '../utils/email.js';
-import sendEmail from '../utils/email.js';
 
 // to protect the routes that only logged in users can access
 export const authenticateUser = catchAsync(async (req, res, next) => {
@@ -247,7 +246,8 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
     try {
         // 3) Send the token into the user email
-        const resetURL = `http://localhost:5174/reset-password/${resetToken}`;
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+        const resetURL = `${frontendUrl}/reset-password/${resetToken}`;
 
         await new Email(user, resetURL).sendPasswordReset();
 
@@ -355,7 +355,8 @@ export const sendVerificationOtp = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // Send email
-    const url = `http://localhost:5174/verify-email/${token}`;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+    const url = `${frontendUrl}/verify-email/${token}`;
     try {
         await new Email(user, url).sendEmailVerification(otp);
 

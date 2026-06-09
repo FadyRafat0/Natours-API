@@ -14,13 +14,15 @@ export const getCheckoutSession = catchAsync(async (req, res, next) => {
 
     if (!tour) return next(new AppError('No tour found with that ID', 404));
 
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5174';
+
     const session = await stripe.checkout.sessions.create({
         // Accept credit cards
         payment_method_types: ['card'],
         // Where to send the user after a successful payment
-        success_url: `http://localhost:5174/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
+        success_url: `${frontendUrl}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
         // Where to send the user if they cancel midway
-        cancel_url: `http://localhost:5174/tour/${tour.nameSlug}`,
+        cancel_url: `${frontendUrl}/tour/${tour.nameSlug}`,
 
         // Customer details
         customer_email: req.user.email,

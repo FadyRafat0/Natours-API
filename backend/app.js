@@ -7,7 +7,7 @@ import xss from 'xss-clean';
 import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-// import compression from 'compression';
+import compression from 'compression';
 
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
@@ -129,7 +129,7 @@ app.use(hpp());
 app.use(express.static(`${__dirname}/public`));
 
 // Compress all responses
-// app.use(compression());
+app.use(compression());
 
 // Test Middleware
 app.use((req, res, next) => {
