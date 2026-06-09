@@ -106,7 +106,7 @@ const Tour = () => {
     fetchTour();
   }, [slug, user]);
 
-  const hasReviewed = tour?.reviews?.some(r => r.user?._id === user?._id || r.user === user?._id);
+  const hasReviewed = tour?.reviews?.some(r => r.user?._id === user?._id || (r.user as any) === user?._id);
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
