@@ -19,6 +19,10 @@ const AdminTours = () => {
   const [formName, setFormName] = useState("");
   const [formPrice, setFormPrice] = useState("");
   const [formDifficulty, setFormDifficulty] = useState("easy");
+  const [formDuration, setFormDuration] = useState("");
+  const [formMaxGroupSize, setFormMaxGroupSize] = useState("");
+  const [formSummary, setFormSummary] = useState("");
+  const [formDescription, setFormDescription] = useState("");
 
   const fetchTours = async () => {
     try {
@@ -63,15 +67,20 @@ const AdminTours = () => {
           name: formName,
           price: Number(formPrice),
           difficulty: formDifficulty,
+          duration: Number(formDuration),
+          maxGroupSize: Number(formMaxGroupSize),
+          summary: formSummary,
+          description: formDescription,
         });
       } else {
         await API.post(`/tours`, {
           name: formName,
           price: Number(formPrice),
           difficulty: formDifficulty,
-          maxGroupSize: 10,
-          duration: 5,
-          summary: "A great tour",
+          maxGroupSize: Number(formMaxGroupSize),
+          duration: Number(formDuration),
+          summary: formSummary,
+          description: formDescription,
         });
       }
       setEditingTour(null);
@@ -87,6 +96,10 @@ const AdminTours = () => {
     setFormName(t.name);
     setFormPrice(String(t.price));
     setFormDifficulty(t.difficulty);
+    setFormDuration(String(t.duration || ""));
+    setFormMaxGroupSize(String(t.maxGroupSize || ""));
+    setFormSummary(t.summary || "");
+    setFormDescription(t.description || "");
   };
 
   const openCreate = () => {
@@ -94,6 +107,10 @@ const AdminTours = () => {
     setFormName("");
     setFormPrice("");
     setFormDifficulty("easy");
+    setFormDuration("");
+    setFormMaxGroupSize("");
+    setFormSummary("");
+    setFormDescription("");
   };
 
   return (
@@ -283,6 +300,50 @@ const AdminTours = () => {
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
             </select>
+          </div>
+          <div>
+            <label className="form__label">
+              Duration (days) <span style={{ color: "red" }}>*</span>
+            </label>
+            <input
+              className="form__input"
+              type="number"
+              value={formDuration}
+              onChange={(e) => setFormDuration(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="form__label">
+              Max Group Size <span style={{ color: "red" }}>*</span>
+            </label>
+            <input
+              className="form__input"
+              type="number"
+              value={formMaxGroupSize}
+              onChange={(e) => setFormMaxGroupSize(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="form__label">
+              Summary <span style={{ color: "red" }}>*</span>
+            </label>
+            <input
+              className="form__input"
+              value={formSummary}
+              onChange={(e) => setFormSummary(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="form__label">Description</label>
+            <textarea
+              className="form__input"
+              value={formDescription}
+              onChange={(e) => setFormDescription(e.target.value)}
+              rows={4}
+            />
           </div>
           <button
             className="btn btn--small btn--green"

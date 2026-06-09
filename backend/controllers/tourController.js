@@ -82,9 +82,11 @@ export const aliasTopTours = (req, res, next) => {
     next();
 };
 
-export const getAllTours = factoryHandler.getAll(Tour, {
-    populateGuides: true,
-});
+export const getAllTours = factoryHandler.getAll(
+    Tour,
+    { populateGuides: true },
+    { populateReviews: true },
+);
 export const getTour = factoryHandler.getOne(
     Tour,
     { populateGuides: true },

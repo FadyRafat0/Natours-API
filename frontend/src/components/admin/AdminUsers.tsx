@@ -19,6 +19,9 @@ const AdminUsers = () => {
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formRole, setFormRole] = useState("user");
+  const [formPassword, setFormPassword] = useState("");
+  const [formPasswordConfirm, setFormPasswordConfirm] = useState("");
+  const [formIsVerified, setFormIsVerified] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -63,14 +66,16 @@ const AdminUsers = () => {
           name: formName,
           email: formEmail,
           role: formRole,
+          isVerified: formIsVerified,
         });
       } else {
         await API.post(`/users`, {
           name: formName,
           email: formEmail,
           role: formRole,
-          password: "password123",
-          passwordConfirm: "password123",
+          isVerified: formIsVerified,
+          password: formPassword,
+          passwordConfirm: formPasswordConfirm,
         });
       }
       setEditingUser(null);
@@ -86,6 +91,9 @@ const AdminUsers = () => {
     setFormName(user.name);
     setFormEmail(user.email);
     setFormRole(user.role);
+    setFormIsVerified(user.isVerified || false);
+    setFormPassword("");
+    setFormPasswordConfirm("");
   };
 
   const openCreate = () => {
@@ -93,6 +101,9 @@ const AdminUsers = () => {
     setFormName("");
     setFormEmail("");
     setFormRole("user");
+    setFormIsVerified(false);
+    setFormPassword("");
+    setFormPasswordConfirm("");
   };
 
   return (
@@ -280,6 +291,48 @@ const AdminUsers = () => {
               <option value="admin">Admin</option>
             </select>
           </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <input
+              type="checkbox"
+              id="isVerified"
+              checked={formIsVerified}
+              onChange={(e) => setFormIsVerified(e.target.checked)}
+              style={{ width: "2rem", height: "2rem", cursor: "pointer" }}
+            />
+            <label htmlFor="isVerified" className="form__label" style={{ margin: 0, cursor: "pointer" }}>
+              Email Verified
+            </label>
+          </div>
+          {creating && (
+            <>
+              <div>
+                <label className="form__label">
+                  Password <span style={{ color: "red" }}>*</span>
+                </label>
+                <input
+                  className="form__input"
+                  type="password"
+                  value={formPassword}
+                  onChange={(e) => setFormPassword(e.target.value)}
+                  required={creating}
+                  minLength={8}
+                />
+              </div>
+              <div>
+                <label className="form__label">
+                  Confirm Password <span style={{ color: "red" }}>*</span>
+                </label>
+                <input
+                  className="form__input"
+                  type="password"
+                  value={formPasswordConfirm}
+                  onChange={(e) => setFormPasswordConfirm(e.target.value)}
+                  required={creating}
+                  minLength={8}
+                />
+              </div>
+            </>
+          )}
           <button
             className="btn btn--small btn--green"
             style={{ marginTop: "1rem" }}

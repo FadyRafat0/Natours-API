@@ -13,8 +13,9 @@ import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import reviewRouter from './routes/reviewRouter.js';
 import bookingRouter from './routes/bookingRouter.js';
+import * as bookingController from './controllers/bookingController.js';
 import AppError from './utils/appError.js';
-import errorHanlder from './controllers/errorController.js';
+import errorHandler from './controllers/errorController.js';
 
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -105,6 +106,9 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+// Stripe webhook MUST be before express.json() because Stripe needs the raw body
+app.post('/webhook-checkout', express.raw({ type: 'application/json' }), bookingController.webhookCheckout);
+
 // Body parser, reading data from body to req.body
 app.use(express.json());
 app.use(cookieParser());
@@ -150,6 +154,6 @@ app.all(/.*/, (req, res, next) => {
     next(new AppError(`Cannot access ${req.originalUrl} In This Server`, 404));
 });
 
-app.use(errorHanlder);
+app.use(errorHandler);
 
 export default app;

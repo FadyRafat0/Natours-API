@@ -86,6 +86,9 @@ userSchema.pre('save', async function () {
 // if email is modified, reset the email confirmation status
 userSchema.pre('save', async function () {
     if (!this.isModified('email')) return;
+    if (this.isNew && this.isVerified === true) return;
+    if (this.isModified('isVerified') && this.isVerified === true) return;
+    
     this.isVerified = false;
 });
 userSchema.pre('findOneAndUpdate', function () {
@@ -93,9 +96,13 @@ userSchema.pre('findOneAndUpdate', function () {
 
     const isEmailBeingUpdated =
         update.email || (update.$set && update.$set.email);
+        
+    const isVerifiedExplicit = update.isVerified !== undefined ? update.isVerified : (update.$set && update.$set.isVerified);
 
     if (isEmailBeingUpdated) {
-        this.set({ isVerified: false });
+        if (isVerifiedExplicit === false) {
+            this.set({ isVerified: false });
+        }
     }
 });
 

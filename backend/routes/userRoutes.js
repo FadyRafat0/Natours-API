@@ -1,14 +1,22 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import * as userController from '../controllers/userController.js';
 import * as authController from '../controllers/authController.js';
 
 const router = express.Router();
 
-router.post('/signup', authController.signup);
-router.post('/login', authController.login);
+const authLimiter = rateLimit({
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+    message: 'Too many authentication attempts, please try again in 15 minutes',
+    validate: { xForwardedForHeader: false, forwardedHeader: false }
+});
+
+router.post('/signup', authLimiter, authController.signup);
+router.post('/login', authLimiter, authController.login);
 // post not get to avoid pre-fetching by the browser problem
 router.post('/logout', authController.logout);
-router.post('/forgotPassword', authController.forgotPassword);
+router.post('/forgotPassword', authLimiter, authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 // Removed old unauthenticated verifyEmail route
 

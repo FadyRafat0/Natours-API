@@ -5,42 +5,10 @@ import type { Tour as TourType, Review } from '../types';
 import { tourImg, userImg, formatDate } from '../utils/helpers';
 import { useAuth } from '../context/AuthContext';
 import Mapbox from '../components/Mapbox';
+import ReviewCard from '../components/ReviewCard';
+import QuickFact from '../components/QuickFact';
 
 const ICONS = '/img/icons.svg';
-
-const ReviewCard = ({ review }: { review: Review }) => (
-  <div className="reviews__card">
-    <div className="reviews__avatar">
-      <img
-        src={userImg(review.user.photo)}
-        alt={review.user.name}
-        className="reviews__avatar-img"
-      />
-      <h6 className="reviews__user">{review.user.name}</h6>
-    </div>
-    <p className="reviews__text">{review.review}</p>
-    <div className="reviews__rating">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <svg
-          key={star}
-          className={`reviews__star reviews__star--${star <= review.rating ? 'active' : 'inactive'}`}
-        >
-          <use href={`${ICONS}#icon-star`} />
-        </svg>
-      ))}
-    </div>
-  </div>
-);
-
-const QuickFact = ({ icon, label, value }: { icon: string; label: string; value: string }) => (
-  <div className="overview-box__detail">
-    <svg className="overview-box__icon">
-      <use href={`${ICONS}#icon-${icon}`} />
-    </svg>
-    <span className="overview-box__label">{label}</span>
-    <span className="overview-box__text">{value}</span>
-  </div>
-);
 
 const Tour = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -56,6 +24,7 @@ const Tour = () => {
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [isEditingReview, setIsEditingReview] = useState(false);
 
   const handleBookTour = async () => {
     if (!tour) return;
@@ -106,20 +75,35 @@ const Tour = () => {
     fetchTour();
   }, [slug, user]);
 
-  const hasReviewed = tour?.reviews?.some(r => r.user?._id === user?._id || (r.user as any) === user?._id);
+  const userReview = tour?.reviews?.find(r => r.user?._id === user?._id || (r.user as any) === user?._id);
+
+  useEffect(() => {
+    if (userReview && isEditingReview) {
+      setReviewText(userReview.review);
+      setReviewRating(userReview.rating);
+    }
+  }, [userReview, isEditingReview]);
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tour) return;
     setReviewLoading(true);
     try {
-      await API.post('/reviews', {
-        tour: tour.id || tour._id,
-        user: user?._id,
-        review: reviewText,
-        rating: reviewRating
-      });
-      alert('Review posted successfully!');
+      if (isEditingReview && userReview) {
+        await API.patch(`/reviews/${userReview._id}`, {
+          review: reviewText,
+          rating: reviewRating
+        });
+        alert('Review updated successfully!');
+      } else {
+        await API.post('/reviews', {
+          tour: tour.id || tour._id,
+          user: user?._id,
+          review: reviewText,
+          rating: reviewRating
+        });
+        alert('Review posted successfully!');
+      }
       window.location.reload();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to post review.');
@@ -258,7 +242,7 @@ const Tour = () => {
         </section>
       )}
 
-      {user && !hasReviewed && isBooked && (
+      {user && !userReview && isBooked && !isEditingReview && (
         <section className="section-cta tour-review-cta">
           <div className="login-form tour-review-form-container">
             <h2 className="heading-secondary ma-bt-md">Leave a Review</h2>
@@ -299,6 +283,61 @@ const Tour = () => {
         </section>
       )}
 
+      {user && userReview && !isEditingReview && (
+        <section className="section-cta tour-review-cta">
+          <div className="login-form tour-review-form-container" style={{ textAlign: 'center' }}>
+            <h2 className="heading-secondary ma-bt-md">You've reviewed this tour!</h2>
+            <button className="btn btn--green" onClick={() => setIsEditingReview(true)}>
+              Edit your review
+            </button>
+          </div>
+        </section>
+      )}
+
+      {user && isEditingReview && (
+        <section className="section-cta tour-review-cta">
+          <div className="login-form tour-review-form-container">
+            <h2 className="heading-secondary ma-bt-md">Edit your Review</h2>
+            <form className="form" onSubmit={handleReviewSubmit}>
+              <div className="form__group">
+                <label className="form__label">Your thoughts</label>
+                <textarea 
+                  className="form__input" 
+                  value={reviewText} 
+                  onChange={e => setReviewText(e.target.value)} 
+                  required 
+                  rows={4}
+                  placeholder="Tell us about your experience..."
+                />
+              </div>
+              <div className="form__group">
+                <label className="form__label">Rating</label>
+                <div className="tour-review-stars">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      onClick={() => setReviewRating(star)}
+                      className="tour-review-star-icon"
+                      style={{ fill: star <= reviewRating ? '#55c57a' : '#bbb', cursor: 'pointer' }}
+                    >
+                      <use href={`${ICONS}#icon-star`} />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+              <div className="form__group tour-review-submit" style={{ display: 'flex', gap: '1rem' }}>
+                <button className="btn btn--green" disabled={reviewLoading}>
+                  {reviewLoading ? 'Saving...' : 'Save Edits'}
+                </button>
+                <button type="button" className="btn btn--white" onClick={() => setIsEditingReview(false)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+      )}
+
       <section className="section-cta">
         <div className="cta">
           <div className="cta__img cta__img--logo">
@@ -322,6 +361,10 @@ const Tour = () => {
               ) : isBooked ? (
                 <button className="btn span-all-rows tour-booked-btn" disabled>
                   Booked
+                </button>
+              ) : !(user as any).isVerified ? (
+                <button className="btn btn--green span-all-rows" disabled>
+                  Verify your email to book
                 </button>
               ) : (
                 <button 

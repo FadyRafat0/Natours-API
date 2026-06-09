@@ -7,7 +7,11 @@ const router = express.Router();
 
 router.use(authController.authenticateUser);
 
-router.get('/checkout-session/:tourId', bookController.getCheckoutSession);
+router.get(
+    '/checkout-session/:tourId',
+    authController.checkEmailVerified,
+    bookController.getCheckoutSession,
+);
 
 router.use(authController.authorizeRoles('admin', 'lead-guide'));
 
