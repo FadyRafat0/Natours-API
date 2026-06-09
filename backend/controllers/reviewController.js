@@ -18,8 +18,6 @@ export const checkIfAuthor = catchAsync(async (req, res, next) => {
 
     if (!review) return next(new AppError('Ne Review With This ID', 404));
 
-    // console.log(req.user._id.equals(review.user));
-
     const isAuthor = req.user._id.equals(review.user);
     if (req.user.role === 'user' && !isAuthor) {
         return next(

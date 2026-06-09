@@ -207,7 +207,6 @@ export const getToursWithin = catchAsync(async (req, res, next) => {
         },
     });
 
-    // console.log(distance, lat, lng);
     res.status(200).json({
         status: 'success',
         results: tours.length,

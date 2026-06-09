@@ -7,6 +7,7 @@ import xss from 'xss-clean';
 import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import compression from 'compression';
 
 import tourRouter from './routes/tourRoutes.js';
 import userRouter from './routes/userRoutes.js';
@@ -20,17 +21,24 @@ const dirname = import.meta.dirname;
 const app = express();
 
 // Implement CORS — allow any localhost port (Vite may use 5173, 5174, etc.)
-app.use(cors({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (Postman, curl) or any localhost origin
-        if (!origin || /^http:\/\/localhost(:\d+)?$/.test(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error(`CORS blocked: ${origin}`));
-        }
-    },
-    credentials: true,
-}));
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Allow requests with no origin (Postman, curl) or any localhost origin, plus the production frontend URL
+            const allowedOrigins = [/^http:\/\/localhost(:\d+)?$/];
+            if (process.env.FRONTEND_URL) {
+                allowedOrigins.push(new RegExp(`^${process.env.FRONTEND_URL}$`));
+            }
+
+            if (!origin || allowedOrigins.some((regex) => regex.test(origin))) {
+                callback(null, true);
+            } else {
+                callback(new Error(`CORS blocked: ${origin}`));
+            }
+        },
+        credentials: true,
+    }),
+);
 
 // Set security HTTP headers with relaxed CSP for required external assets
 app.use(
@@ -115,10 +123,12 @@ app.use(hpp());
 // Serving static files, public folder become the root
 app.use(express.static(`${dirname}/public`));
 
+// Compress all responses
+app.use(compression());
+
 // Test Middleware
 app.use((req, res, next) => {
     req.requestTime = new Date();
-    // console.log(req.cookies);
     next();
 });
 

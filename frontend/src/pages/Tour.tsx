@@ -130,7 +130,7 @@ const Tour = () => {
 
   if (loading) {
     return (
-      <main className="main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <main className="main tour-flex-center">
         <div className="spinner" />
       </main>
     );
@@ -138,7 +138,7 @@ const Tour = () => {
 
   if (error || !tour) {
     return (
-      <main className="main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <main className="main tour-flex-center">
         <div className="error">
           <div className="error__title">
             <h2 className="heading-secondary heading-secondary--error">Uh oh! Something went wrong!</h2>
@@ -242,7 +242,7 @@ const Tour = () => {
         {tour.locations && tour.locations.length > 0 ? (
           <Mapbox locations={tour.locations} />
         ) : (
-          <div style={{ textAlign: 'center', padding: '10rem 0' }}>
+          <div className="tour-no-locations">
             <h2 className="heading-secondary">No locations provided</h2>
           </div>
         )}
@@ -259,8 +259,8 @@ const Tour = () => {
       )}
 
       {user && !hasReviewed && isBooked && (
-        <section className="section-cta" style={{ paddingTop: '5rem', paddingBottom: '0', backgroundColor: '#f3f3f3', marginTop: '-1px' }}>
-          <div className="login-form" style={{ margin: '0 auto', maxWidth: '80rem', padding: '5rem 7rem', backgroundColor: '#fff', borderRadius: '1rem', boxShadow: '0 1.5rem 4rem rgba(0,0,0,0.1)' }}>
+        <section className="section-cta tour-review-cta">
+          <div className="login-form tour-review-form-container">
             <h2 className="heading-secondary ma-bt-md">Leave a Review</h2>
             <form className="form" onSubmit={handleReviewSubmit}>
               <div className="form__group">
@@ -276,19 +276,20 @@ const Tour = () => {
               </div>
               <div className="form__group">
                 <label className="form__label">Rating</label>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="tour-review-stars">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
                       key={star}
                       onClick={() => setReviewRating(star)}
-                      style={{ height: '3rem', width: '3rem', cursor: 'pointer', fill: star <= reviewRating ? '#55c57a' : '#bbb' }}
+                      className="tour-review-star-icon"
+                      style={{ fill: star <= reviewRating ? '#55c57a' : '#bbb' }}
                     >
                       <use href={`${ICONS}#icon-star`} />
                     </svg>
                   ))}
                 </div>
               </div>
-              <div className="form__group" style={{ marginTop: '3rem' }}>
+              <div className="form__group tour-review-submit">
                 <button className="btn btn--green" disabled={reviewLoading}>
                   {reviewLoading ? 'Submitting...' : 'Submit Review'}
                 </button>
@@ -319,7 +320,7 @@ const Tour = () => {
               bookingCheckLoading ? (
                 <button className="btn btn--green span-all-rows" disabled>Checking...</button>
               ) : isBooked ? (
-                <button className="btn span-all-rows" style={{ backgroundColor: '#777', color: '#fff', cursor: 'not-allowed', gridColumn: '1 / -1' }} disabled>
+                <button className="btn span-all-rows tour-booked-btn" disabled>
                   Booked
                 </button>
               ) : (

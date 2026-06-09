@@ -43,7 +43,6 @@ export const authenticateUser = catchAsync(async (req, res, next) => {
 
     // 2) Check if the token is valid
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    // console.log(decoded);
 
     // 3) Check if the user still exists
     const user = await User.findById(decoded.id);
@@ -153,7 +152,6 @@ const createSendToken = (user, statusCode, res) => {
 
 // to sign up the user and send the token to client
 export const signup = catchAsync(async (req, res, next) => {
-    // console.log(req.body);
     const user = await User.create({
         name: req.body.name,
         email: req.body.email,
@@ -173,8 +171,6 @@ export const signup = catchAsync(async (req, res, next) => {
 // to login the user and send the token to client
 export const login = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
-
-    // console.log(email, password);
 
     // 1) check the email and password exist
     if (!email || !password) {

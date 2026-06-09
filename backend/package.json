@@ -14,19 +14,10 @@
     "author": "fady rafat",
     "type": "module",
     "main": "server.js",
-    "frontend": "./public/js/bundle.js",
-    "targets": {
-        "main": false,
-        "frontend": {
-            "source": "./public/js/index.js"
-        }
-    },
     "scripts": {
         "start": "cross-env NODE_ENV=development nodemon --exec tsx server.js",
-        "start:prod": "cross-env NODE_ENV=production nodemon --exec tsx server.js",
-        "debug": "cross-env NODE_ENV=development ndb server.js",
-        "watch:js": "parcel watch --target frontend",
-        "build:js": "parcel build --target frontend"
+        "start:prod": "cross-env NODE_ENV=production node server.js",
+        "debug": "cross-env NODE_ENV=development ndb server.js"
     },
     "dependencies": {
         "axios": "^1.16.1",

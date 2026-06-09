@@ -13,7 +13,6 @@ mongoose
     .connect(DB)
     .then(() => {
         console.log('DB connection successful!');
-        // console.log(con.connections);
     })
     .catch((err) => {
         console.log(err);
@@ -21,7 +20,6 @@ mongoose
 
 const server = app.listen(port, (err) => {
     if (err) return console.log(err);
-    console.log(`Start Listening At Port ${port} 😀`);
 });
 
 process.on('unhandledRejection', (err) => {

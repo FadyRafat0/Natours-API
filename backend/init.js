@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 
-const dirname = import.meta.dirname;
+const { dirname } = import.meta;
 dotenv.config({ path: `${dirname}/config.env` });
 
 process.on('uncaughtException', (err) => {

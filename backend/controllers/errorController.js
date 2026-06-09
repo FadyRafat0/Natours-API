@@ -57,7 +57,7 @@ export default (err, req, res, next) => {
 
     if (process.env.NODE_ENV === 'development') {
         sendDevError(err, req, res);
-    } else if (process.env.NODE_ENV === 'production') {
+    } else {
         let operationalError = err;
 
         if (err.name === 'CastError') operationalError = handleCastErrorDB(err);
