@@ -23,27 +23,32 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 
+// Trust the first proxy (Vercel / cloud hosts set X-Forwarded-For)
+app.set('trust proxy', 1);
+
 // Implement CORS — allow any localhost port (Vite may use 5173, 5174, etc.)
-app.use(
-    cors({
-        origin: (origin, callback) => {
+const corsOptions = {
+    origin: (origin, callback) => {
             // Allow requests with no origin (Postman, curl) or any localhost origin, plus the production frontend URL
             const allowedOrigins = [/^http:\/\/localhost(:\d+)?$/];
-            if (process.env.FRONTEND_URL) {
+        if (process.env.FRONTEND_URL) {
                 allowedOrigins.push(
                     new RegExp(`^${process.env.FRONTEND_URL}$`),
-                );
-            }
+            );
+        }
 
             if (!origin || allowedOrigins.some((regex) => regex.test(origin))) {
-                callback(null, true);
-            } else {
-                callback(new Error(`CORS blocked: ${origin}`));
-            }
-        },
-        credentials: true,
-    }),
-);
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS blocked: ${origin}`));
+        }
+    },
+    credentials: true,
+};
+
+// Handle preflight OPTIONS requests explicitly (critical for Vercel serverless)
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
 // Set security HTTP headers with relaxed CSP for required external assets
 app.use(
