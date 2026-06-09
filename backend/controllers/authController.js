@@ -141,6 +141,8 @@ const createSendToken = (user, statusCode, res) => {
         secure: true,
         // to make it read-only no javascript code can edit it
         httpOnly: true,
+        // REQUIRED for cross-domain cookies (frontend on different domain than backend)
+        sameSite: 'none',
     });
     res.status(statusCode).json({
         status: 'success',
@@ -202,6 +204,8 @@ export const logout = (req, res) => {
     res.cookie('jwt', 'loggedout', {
         expires: new Date(Date.now() + 10 * 1000),
         httpOnly: true,
+        secure: true,
+        sameSite: 'none',
     });
     res.status(200).json({ status: 'success' });
 };
