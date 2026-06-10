@@ -1,17 +1,51 @@
+import { useEffect, useState } from 'react';
+import API from '../../api';
+import { useAuth } from '../../context/AuthContext';
+import { formatDate } from '../../utils/helpers';
+
 const BillingContent = () => {
+  const { user } = useAuth();
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (!user) return;
+      try {
+        const res = await API.get(`/bookings?user=${user._id || (user as any).id}`);
+        setBookings(res.data.data || res.data.results || []);
+      } catch (err) {
+        console.error('Failed to fetch bookings', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [user]);
+
+  const totalSpent = bookings.reduce((acc, curr) => acc + (curr.price || 0), 0);
+
+  if (loading) {
+    return (
+      <div className="user-view__form-container">
+        <h2 className="heading-secondary ma-bt-md">Billing Overview</h2>
+        <p>Loading billing data...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="user-view__form-container">
       <h2 className="heading-secondary ma-bt-md">Billing Overview</h2>
 
       <div className="billing-grid">
-
         <div className="billing-card billing-card--center">
-
           <h3 className="heading-tertirary billing-card__title">
-            Current Balance
+            Total Spent
           </h3>
           <p className="billing-card__balance">
-            $0.00
+            ${totalSpent.toFixed(2)}
           </p>
           <span
             className="btn btn--small btn--green"
@@ -22,48 +56,39 @@ const BillingContent = () => {
         </div>
 
         <div className="billing-card">
-
           <h3 className="heading-tertirary billing-card__title billing-card__title--mb">
             Payment Methods
           </h3>
           <div className="billing-card__payment-method">
-
             <div className="billing-card__icon">💳</div>
             <div>
               <p className="billing-card__text-bold">
-                Visa ending in 4242
+                Stripe Checkout
               </p>
-              <p className="billing-card__text-muted">Expires 12/26</p>
+              <p className="billing-card__text-muted">Securely Handled</p>
             </div>
           </div>
-          <button className="btn-text billing-card__btn-add">
-            + Add payment method
-          </button>
         </div>
       </div>
 
-      <h2 className="heading-secondary ma-bt-md">Recent Invoices</h2>
+      <h2 className="heading-secondary ma-bt-md">Recent Bookings (Invoices)</h2>
       <div className="invoice-list">
-
-        {[1, 2, 3].map((num) => (
-          <div key={num} className="invoice-item">
-
-            <div>
-              <p className="billing-card__text-bold">
-                Invoice INV-{2025000 + num}
-              </p>
-              <p className="billing-card__text-muted">
-                Oct {num + 10}, 2025 &bull; $497.00
-              </p>
+        {bookings.length === 0 ? (
+          <p>No past bookings found.</p>
+        ) : (
+          bookings.map((booking, i) => (
+            <div key={booking._id || i} className="invoice-item">
+              <div>
+                <p className="billing-card__text-bold">
+                  {booking.tour?.name ? `${booking.tour.name} Tour` : `Invoice INV-${booking._id.substring(0, 6).toUpperCase()}`}
+                </p>
+                <p className="billing-card__text-muted">
+                  {booking.createdAt ? formatDate(booking.createdAt) : 'Recent'} &bull; ${booking.price?.toFixed(2)}
+                </p>
+              </div>
             </div>
-            <button
-              className="btn btn--small invoice-item__btn"
-              onClick={() => alert("Downloading invoice...")}
-            >
-              Download PDF
-            </button>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

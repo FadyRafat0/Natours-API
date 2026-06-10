@@ -242,7 +242,7 @@ const Tour = () => {
         </section>
       )}
 
-      {user && !userReview && isBooked && !isEditingReview && (
+      {user && !userReview && !isEditingReview && (
         <section className="section-cta tour-review-cta">
           <div className="login-form tour-review-form-container">
             <h2 className="heading-secondary ma-bt-md">Leave a Review</h2>
