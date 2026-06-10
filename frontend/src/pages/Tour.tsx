@@ -242,7 +242,7 @@ const Tour = () => {
         </section>
       )}
 
-      {user && !userReview && !isEditingReview && (
+      {user && user.role === 'user' && !userReview && !isEditingReview && (
         <section className="section-cta tour-review-cta">
           <div className="login-form tour-review-form-container">
             <h2 className="heading-secondary ma-bt-md">Leave a Review</h2>
@@ -283,7 +283,7 @@ const Tour = () => {
         </section>
       )}
 
-      {user && userReview && !isEditingReview && (
+      {user && user.role === 'user' && userReview && !isEditingReview && (
         <section className="section-cta tour-review-cta">
           <div className="login-form tour-review-form-container" style={{ textAlign: 'center' }}>
             <h2 className="heading-secondary ma-bt-md">You've reviewed this tour!</h2>
@@ -294,7 +294,7 @@ const Tour = () => {
         </section>
       )}
 
-      {user && isEditingReview && (
+      {user && user.role === 'user' && isEditingReview && (
         <section className="section-cta tour-review-cta">
           <div className="login-form tour-review-form-container">
             <h2 className="heading-secondary ma-bt-md">Edit your Review</h2>
