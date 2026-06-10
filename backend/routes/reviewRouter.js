@@ -2,7 +2,6 @@ import express from 'express';
 import * as reviewController from './../controllers/reviewController.js';
 import * as authController from './../controllers/authController.js';
 
-// when tour called us we need tourId
 const router = express.Router({ mergeParams: true });
 
 router.use(authController.authenticateUser);

@@ -80,33 +80,6 @@ export const checkEmailVerified = catchAsync(async (req, res, next) => {
     }
     next();
 });
-// checked if the user logged in , no errors!
-export const isLoggedIn = async (req, res, next) => {
-    try {
-        let token = req.cookies.jwt;
-
-        // 1) check if the token exist
-        if (!token) return next();
-
-        // 2) Check if the token is valid
-        const decoded = await promisify(jwt.verify)(
-            token,
-            process.env.JWT_SECRET,
-        );
-
-        // 3) Check if the user still exists
-        const user = await User.findById(decoded.id);
-        if (!user) return next();
-
-        // 4) Check if user changed password after the token was issued
-        if (user.changedPasswordAfter(decoded.iat)) return next();
-
-        res.locals.user = user;
-        next();
-    } catch (err) {
-        next();
-    }
-};
 // to restrict the access to certain routes based on user role
 export const authorizeRoles = (...roles) => {
     return (req, res, next) => {
@@ -161,7 +134,7 @@ export const signup = catchAsync(async (req, res, next) => {
     });
 
     // Fire email asynchronously — do NOT block the response
-    const url = `${req.protocol}://${req.get('host')}/me`;
+    const url = `${process.env.FRONTEND_URL || 'http://localhost:5174'}/me`;
     // Send welcome email without awaiting to avoid delaying signup response
     new Email(user, url).sendWelcome();
 
@@ -234,13 +207,12 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
         email: req.body.email,
     });
 
+    const genericMessage = 'If an account with that email exists, a password reset link has been sent';
     // To prevent Email Enumeration attacks
     if (!user) {
-        // Fake Respond
         return res.status(200).json({
             status: 'success',
-            message:
-                'If an account with that email exists, a password reset link has been sent',
+            message: genericMessage,
         });
     }
 
@@ -257,8 +229,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
         res.status(200).json({
             status: 'success',
-            message:
-                'If an account with that email exists, a password reset link has been sent',
+            message: genericMessage,
         });
     } catch (err) {
         user.passwordResetToken = undefined;

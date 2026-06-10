@@ -18,24 +18,19 @@ router.post('/login', authLimiter, authController.login);
 router.post('/logout', authController.logout);
 router.post('/forgotPassword', authLimiter, authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
-// Removed old unauthenticated verifyEmail route
 
 router.use(authController.authenticateUser);
 
-// I am Logged In but I want to resend the OTP for email verification
 router.post('/sendVerificationOtp', authController.sendVerificationOtp);
 router.post('/verifyEmailOtp', authController.verifyEmailOtp);
-
 router.patch('/updatePassword', authController.updatePassword);
 
 router
     .route('/me')
     .all(userController.setUserId)
     .get(userController.getUser)
-    // updateCheck before resizing the user photo and save it in the files
     .patch(
         userController.uploadPhoto,
-        // name , email (photo if exist is handled via multer file otherwise undefined)
         userController.filterAllowedUpdates('name', 'email'),
         userController.resizePhoto,
         userController.updateMe,

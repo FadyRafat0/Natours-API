@@ -120,17 +120,10 @@ tourSchema.index({ price: 1, ratingsAverage: 1 });
 tourSchema.index({ nameSlug: 1 });
 tourSchema.index({ startLocation: '2dsphere' });
 
-// DOCUMENT MIDDLEWARE
-// PRE is called before updating in DB
 // .save() , .create() (not insertMany)
 tourSchema.pre('save', async function () {
     this.nameSlug = slugify(this.name, { lower: true });
 });
-
-// tourSchema.pre('save', async function () {
-//     const guidesPromises = this.guides.map(async (id) => User.findById(id));
-//     this.guides = await Promise.all(guidesPromises);
-// });
 
 // OPTIONS: populateGuides | populateReviews
 tourSchema.pre(/^find/, function () {

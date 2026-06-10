@@ -356,23 +356,29 @@ const Tour = () => {
               {tour.duration} days. 1 adventure. Infinite memories. Make it yours today!
             </p>
             {user ? (
-              bookingCheckLoading ? (
-                <button className="btn btn--green span-all-rows" disabled>Checking...</button>
-              ) : isBooked ? (
-                <button className="btn span-all-rows tour-booked-btn" disabled>
-                  Booked
-                </button>
-              ) : !(user as any).isVerified ? (
-                <button className="btn btn--green span-all-rows" disabled>
-                  Verify your email to book
-                </button>
+              user.role === 'user' ? (
+                bookingCheckLoading ? (
+                  <button className="btn btn--green span-all-rows" disabled>Checking...</button>
+                ) : isBooked ? (
+                  <button className="btn span-all-rows tour-booked-btn" disabled>
+                    Booked
+                  </button>
+                ) : !(user as any).isVerified ? (
+                  <button className="btn btn--green span-all-rows" disabled>
+                    Verify your email to book
+                  </button>
+                ) : (
+                  <button 
+                    className="btn btn--green span-all-rows"
+                    onClick={handleBookTour}
+                    disabled={bookingLoading}
+                  >
+                    {bookingLoading ? 'Processing...' : 'Book tour now!'}
+                  </button>
+                )
               ) : (
-                <button 
-                  className="btn btn--green span-all-rows"
-                  onClick={handleBookTour}
-                  disabled={bookingLoading}
-                >
-                  {bookingLoading ? 'Processing...' : 'Book tour now!'}
+                <button className="btn span-all-rows tour-booked-btn" disabled>
+                  Only users can book tours
                 </button>
               )
             ) : (

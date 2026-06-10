@@ -56,30 +56,34 @@ const Account = () => {
             </li>
           </ul>
 
-          {user.role === 'admin' && (
+          {(user.role === 'admin' || user.role === 'lead-guide') && (
             <div className="admin-nav">
-              <h5 className="admin-nav__heading">Admin</h5>
+              <h5 className="admin-nav__heading">{user.role === 'admin' ? 'Admin' : 'Lead Guide'}</h5>
               <ul className="side-nav">
                 <li className={activeTab === 'admin-tours' ? 'side-nav--active' : ''}>
                   <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('admin-tours'); }}>
                     <svg><use href="/img/icons.svg#icon-map" /></svg>Manage tours
                   </a>
                 </li>
-                <li className={activeTab === 'admin-users' ? 'side-nav--active' : ''}>
-                  <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('admin-users'); }}>
-                    <svg><use href="/img/icons.svg#icon-users" /></svg>Manage users
-                  </a>
-                </li>
-                <li className={activeTab === 'admin-reviews' ? 'side-nav--active' : ''}>
-                  <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('admin-reviews'); }}>
-                    <svg><use href="/img/icons.svg#icon-star" /></svg>Manage reviews
-                  </a>
-                </li>
-                <li className={activeTab === 'admin-bookings' ? 'side-nav--active' : ''}>
-                  <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('admin-bookings'); }}>
-                    <svg><use href="/img/icons.svg#icon-briefcase" /></svg>Manage bookings
-                  </a>
-                </li>
+                {user.role === 'admin' && (
+                  <>
+                    <li className={activeTab === 'admin-users' ? 'side-nav--active' : ''}>
+                      <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('admin-users'); }}>
+                        <svg><use href="/img/icons.svg#icon-users" /></svg>Manage users
+                      </a>
+                    </li>
+                    <li className={activeTab === 'admin-reviews' ? 'side-nav--active' : ''}>
+                      <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('admin-reviews'); }}>
+                        <svg><use href="/img/icons.svg#icon-star" /></svg>Manage reviews
+                      </a>
+                    </li>
+                    <li className={activeTab === 'admin-bookings' ? 'side-nav--active' : ''}>
+                      <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('admin-bookings'); }}>
+                        <svg><use href="/img/icons.svg#icon-briefcase" /></svg>Manage bookings
+                      </a>
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
           )}

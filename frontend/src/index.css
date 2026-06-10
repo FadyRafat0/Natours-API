@@ -1670,8 +1670,8 @@ body {
     gap: 1rem;
   }
   .tour-review-star-icon {
-    height: 3rem;
-    width: 3rem;
+    height: 2rem;
+    width: 2rem;
     cursor: pointer;
   }
   .tour-review-submit {

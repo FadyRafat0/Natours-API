@@ -2,18 +2,18 @@ import express from 'express';
 import * as bookController from './../controllers/bookingController.js';
 import * as authController from './../controllers/authController.js';
 
-// when tour called us we need tourId
 const router = express.Router();
 
 router.use(authController.authenticateUser);
 
 router.get(
     '/checkout-session/:tourId',
+    authController.authorizeRoles('user'),
     authController.checkEmailVerified,
     bookController.getCheckoutSession,
 );
 
-router.use(authController.authorizeRoles('admin', 'lead-guide'));
+router.use(authController.authorizeRoles('admin'));
 
 router
     .route('/')
