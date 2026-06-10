@@ -21,7 +21,7 @@ export const getCheckoutSession = catchAsync(async (req, res, next) => {
         // Accept credit cards
         payment_method_types: ['card'],
         // Where to send the user after a successful payment
-        success_url: `${frontendUrl}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
+        success_url: `${frontendUrl}/tour/${tour.nameSlug}`,
         // Where to send the user if they cancel midway
         cancel_url: `${frontendUrl}/tour/${tour.nameSlug}`,
 
