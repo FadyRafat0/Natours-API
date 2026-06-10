@@ -243,7 +243,7 @@ const Tour = () => {
       )}
 
       {user && user.role === 'user' && !userReview && !isEditingReview && (
-        <section className="section-cta tour-review-cta">
+        <section className="section-cta tour-review-cta" style={{ paddingBottom: '5rem' }}>
           <div className="login-form tour-review-form-container">
             <h2 className="heading-secondary ma-bt-md">Leave a Review</h2>
             <form className="form" onSubmit={handleReviewSubmit}>
@@ -260,13 +260,18 @@ const Tour = () => {
               </div>
               <div className="form__group">
                 <label className="form__label">Rating</label>
-                <div className="tour-review-stars">
+                <div className="tour-review-stars" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
                       key={star}
                       onClick={() => setReviewRating(star)}
                       className="tour-review-star-icon"
-                      style={{ fill: star <= reviewRating ? '#55c57a' : '#bbb' }}
+                      style={{ 
+                        fill: star <= reviewRating ? '#55c57a' : '#bbb', 
+                        cursor: 'pointer',
+                        height: '2.5rem',
+                        width: '2.5rem'
+                      }}
                     >
                       <use href={`${ICONS}#icon-star`} />
                     </svg>
@@ -284,7 +289,7 @@ const Tour = () => {
       )}
 
       {user && user.role === 'user' && userReview && !isEditingReview && (
-        <section className="section-cta tour-review-cta">
+        <section className="section-cta tour-review-cta" style={{ paddingBottom: '5rem' }}>
           <div className="login-form tour-review-form-container" style={{ textAlign: 'center' }}>
             <h2 className="heading-secondary ma-bt-md">You've reviewed this tour!</h2>
             <button className="btn btn--green" onClick={() => setIsEditingReview(true)}>
@@ -295,7 +300,7 @@ const Tour = () => {
       )}
 
       {user && user.role === 'user' && isEditingReview && (
-        <section className="section-cta tour-review-cta">
+        <section className="section-cta tour-review-cta" style={{ paddingBottom: '5rem' }}>
           <div className="login-form tour-review-form-container">
             <h2 className="heading-secondary ma-bt-md">Edit your Review</h2>
             <form className="form" onSubmit={handleReviewSubmit}>
@@ -312,13 +317,18 @@ const Tour = () => {
               </div>
               <div className="form__group">
                 <label className="form__label">Rating</label>
-                <div className="tour-review-stars">
+                <div className="tour-review-stars" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
                       key={star}
                       onClick={() => setReviewRating(star)}
                       className="tour-review-star-icon"
-                      style={{ fill: star <= reviewRating ? '#55c57a' : '#bbb', cursor: 'pointer' }}
+                      style={{ 
+                        fill: star <= reviewRating ? '#55c57a' : '#bbb', 
+                        cursor: 'pointer',
+                        height: '2.5rem',
+                        width: '2.5rem'
+                      }}
                     >
                       <use href={`${ICONS}#icon-star`} />
                     </svg>

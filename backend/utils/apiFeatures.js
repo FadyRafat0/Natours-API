@@ -17,7 +17,7 @@ class APIFeatures {
         // 2) Advanced Filtering (gt, gte, lt, lte)
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(
-            /\b(gte|gt|lte|lt)\b/g,
+            /\b(gte|gt|lte|lt|regex|options)\b/g,
             (match) => `$${match}`,
         );
 

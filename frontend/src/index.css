@@ -1363,128 +1363,128 @@ body {
 }
 
 #root {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
 
-  /* Billing Utilities */
-  .billing-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    margin-bottom: 4rem;
-  }
+/* Billing Utilities */
+.billing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 4rem;
+}
 
-  .billing-card {
-    background-color: #fff;
-    padding: 3rem;
-    border-radius: 1rem;
-    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
-  }
-  .billing-card--center {
-    text-align: center;
-  }
-  .billing-card__title {
-    font-size: 1.6rem;
-    color: #777;
-    text-transform: uppercase;
-  }
-  .billing-card__title--mb {
-    margin-bottom: 2rem;
-  }
-  .billing-card__balance {
-    font-size: 4rem;
-    font-weight: 700;
-    color: #55c57a;
-    margin: 1rem 0;
-  }
-  .billing-card__payment-method {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    background-color: #f9f9f9;
-    border-radius: 0.5rem;
-    border: 1px solid #eee;
-  }
-  .billing-card__icon {
-    font-size: 3rem;
-    color: #55c57a;
-  }
-  .billing-card__text-bold {
-    font-size: 1.4rem;
-    font-weight: 700;
-  }
-  .billing-card__text-muted {
-    font-size: 1.2rem;
-    color: #999;
-  }
-  .billing-card__btn-add {
-    margin-top: 1.5rem;
-    font-size: 1.4rem;
-  }
+.billing-card {
+  background-color: #fff;
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
+}
+.billing-card--center {
+  text-align: center;
+}
+.billing-card__title {
+  font-size: 1.6rem;
+  color: #777;
+  text-transform: uppercase;
+}
+.billing-card__title--mb {
+  margin-bottom: 2rem;
+}
+.billing-card__balance {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #55c57a;
+  margin: 1rem 0;
+}
+.billing-card__payment-method {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 0.5rem;
+  border: 1px solid #eee;
+}
+.billing-card__icon {
+  font-size: 3rem;
+  color: #55c57a;
+}
+.billing-card__text-bold {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.billing-card__text-muted {
+  font-size: 1.2rem;
+  color: #999;
+}
+.billing-card__btn-add {
+  margin-top: 1.5rem;
+  font-size: 1.4rem;
+}
 
-  /* Invoice List */
-  .invoice-list {
-    background-color: #fff;
-    border-radius: 1rem;
-    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
-  .invoice-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2rem;
-  }
-  .invoice-item:not(:last-child) {
-    border-bottom: 1px solid #f4f2f2;
-  }
-  .invoice-item__btn {
-    background-color: #f3f3f3;
-    color: #777;
-  }
+/* Invoice List */
+.invoice-list {
+  background-color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+.invoice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+}
+.invoice-item:not(:last-child) {
+  border-bottom: 1px solid #f4f2f2;
+}
+.invoice-item__btn {
+  background-color: #f3f3f3;
+  color: #777;
+}
 
-  /* Tour Utilities */
-  .tour-flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .tour-no-locations {
-    text-align: center;
-    padding: 10rem 0;
-  }
-  .tour-review-cta {
-    padding-top: 5rem;
-    padding-bottom: 0;
-    background-color: #f3f3f3;
-    margin-top: -1px;
-  }
-  .tour-review-form-container {
-    margin: 0 auto;
-    max-width: 80rem;
-    padding: 5rem 7rem;
-    background-color: #fff;
-    border-radius: 1rem;
-    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
-  }
-  .tour-review-stars {
-    display: flex;
-    gap: 1rem;
-  }
-  .tour-review-star-icon {
-    height: 2rem;
-    width: 2rem;
-    cursor: pointer;
-  }
-  .tour-review-submit {
-    margin-top: 3rem;
-  }
-  .tour-booked-btn {
-    background-color: #777;
-    color: #fff;
-    cursor: not-allowed;
-    grid-column: 1 / -1;
-  }
+/* Tour Utilities */
+.tour-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tour-no-locations {
+  text-align: center;
+  padding: 10rem 0;
+}
+.tour-review-cta {
+  padding-top: 5rem;
+  padding-bottom: 0;
+  background-color: #f3f3f3;
+  margin-top: -1px;
+}
+.tour-review-form-container {
+  margin: 0 auto;
+  max-width: 80rem;
+  padding: 5rem 7rem;
+  background-color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
+}
+.tour-review-stars {
+  display: flex;
+  gap: 1rem;
+}
+.tour-review-star-icon {
+  height: 2rem;
+  width: 2rem;
+  cursor: pointer;
+}
+.tour-review-submit {
+  margin-top: 3rem;
+}
+.tour-booked-btn {
+  background-color: #777;
+  color: #fff;
+  cursor: not-allowed;
+  grid-column: 1 / -1;
+}

@@ -20,6 +20,7 @@ router.post('/forgotPassword', authLimiter, authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 
 router.use(authController.authenticateUser);
+router.use(authController.restrictDemoUser);
 
 router.post('/sendVerificationOtp', authController.sendVerificationOtp);
 router.post('/verifyEmailOtp', authController.verifyEmailOtp);

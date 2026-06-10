@@ -95,6 +95,24 @@ export const authorizeRoles = (...roles) => {
     };
 };
 
+// Block write operations for the demo admin account
+const DEMO_ADMIN_EMAIL = 'demo@fady-natours.com';
+export const restrictDemoUser = (req, res, next) => {
+    if (
+        req.user &&
+        req.user.email === DEMO_ADMIN_EMAIL &&
+        req.method !== 'GET'
+    ) {
+        return next(
+            new AppError(
+                'This is a demo account. You cannot modify any data.',
+                403,
+            ),
+        );
+    }
+    next();
+};
+
 // JWT (Create & Send)
 // to create a token for the user
 const signToken = (id) => {

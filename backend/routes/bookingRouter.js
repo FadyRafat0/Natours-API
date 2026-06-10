@@ -5,6 +5,7 @@ import * as authController from './../controllers/authController.js';
 const router = express.Router();
 
 router.use(authController.authenticateUser);
+router.use(authController.restrictDemoUser);
 
 router.get(
     '/checkout-session/:tourId',

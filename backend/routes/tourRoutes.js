@@ -30,6 +30,7 @@ router
     .get(tourController.getAllTours)
     .post(
         authController.authenticateUser,
+        authController.restrictDemoUser,
         authController.authorizeRoles('admin', 'lead-guide'),
         tourController.uploadImages,
         tourController.resizeImages,
@@ -41,6 +42,7 @@ router
     .get(tourController.getTour)
     .patch(
         authController.authenticateUser,
+        authController.restrictDemoUser,
         authController.authorizeRoles('admin', 'lead-guide'),
         tourController.uploadImages,
         tourController.resizeImages,
@@ -48,6 +50,7 @@ router
     )
     .delete(
         authController.authenticateUser,
+        authController.restrictDemoUser,
         authController.authorizeRoles('admin', 'lead-guide'),
         tourController.deleteImages,
         tourController.deleteTour,
