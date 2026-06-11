@@ -17,7 +17,7 @@ const BookingsContent = () => {
       try {
         setLoading(true);
         const res = await API.get(
-          `/bookings?user=${user?._id}&page=${page}&limit=${limit}`,
+          `/bookings/my-bookings?page=${page}&limit=${limit}`,
         );
         setBookings(res.data.data);
         setTotal(res.data.results || 0);

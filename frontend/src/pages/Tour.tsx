@@ -20,19 +20,20 @@ const Tour = () => {
   
 
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [isBooked, setIsBooked] = useState(false);
+  const [isBookedState, setIsBookedState] = useState(false);
   const [bookingCheckLoading, setBookingCheckLoading] = useState(false);
 
+  const searchParams = new URLSearchParams(location.search);
+  const alertMsg = searchParams.get('alert');
+  const isBooked = isBookedState || alertMsg === 'booking';
+
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const alertMsg = searchParams.get('alert');
     if (alertMsg === 'booking') {
       setTimeout(() => alert("Your booking was successful!"), 100);
-      setIsBooked(true); 
     } else if (alertMsg === 'booking_failed') {
       setTimeout(() => alert("Your booking was cancelled or failed."), 100);
     }
-  }, [location.search]);
+  }, [alertMsg]);
 
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
@@ -69,11 +70,18 @@ const Tour = () => {
           if (user) {
             setBookingCheckLoading(true);
             try {
-              const bookingRes = await API.get(`/bookings?user=${user._id}&tour=${fetchedTour.id || fetchedTour._id}`);
-              if (bookingRes.data.results && bookingRes.data.results > 0) {
-                setIsBooked(true);
+              const bookingRes = await API.get(`/bookings/my-bookings`);
+              const tourId = fetchedTour.id || fetchedTour._id;
+              const hasBooking = bookingRes.data.data?.some(
+                (b: { tour: { _id: string } | string }) => {
+                  const bTourId = typeof b.tour === 'string' ? b.tour : b.tour?._id;
+                  return bTourId === tourId;
+                }
+              );
+              if (hasBooking) {
+                setIsBookedState(true);
               }
-            } catch(e) {}
+            } catch(_) { /* user may not have bookings access */ }
             setBookingCheckLoading(false);
           }
         } else {
@@ -118,8 +126,9 @@ const Tour = () => {
         alert('Review posted successfully!');
       }
       window.location.reload();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to post review.');
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      alert(errorResponse.response?.data?.message || 'Failed to post review.');
     } finally {
       setReviewLoading(false);
     }

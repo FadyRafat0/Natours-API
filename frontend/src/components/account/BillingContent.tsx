@@ -12,7 +12,7 @@ const BillingContent = () => {
     const fetchBookings = async () => {
       if (!user) return;
       try {
-        const res = await API.get(`/bookings?user=${user._id || (user as any).id}`);
+        const res = await API.get(`/bookings/my-bookings`);
         setBookings(res.data.data || res.data.results || []);
       } catch (err) {
         console.error('Failed to fetch bookings', err);

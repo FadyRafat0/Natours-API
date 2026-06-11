@@ -48,7 +48,7 @@ reviewSchema.pre(/^find/, function () {
     if (options.populateTour) {
         this.populate({
             path: 'tour',
-            select: '_id name price duration difficulty',
+            select: '_id name price duration difficulty imageCover',
         });
     }
 

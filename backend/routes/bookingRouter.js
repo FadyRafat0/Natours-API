@@ -14,6 +14,9 @@ router.get(
     bookController.getCheckoutSession,
 );
 
+// Allow logged-in users to see their own bookings
+router.get('/my-bookings', bookController.getMyBookings);
+
 router.use(authController.authorizeRoles('admin'));
 
 router
