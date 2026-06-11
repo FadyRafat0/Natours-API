@@ -19,7 +19,7 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      await API.patch(`/users/resetPassword/${token}`, {
+      const res = await API.patch(`/users/resetPassword/${token}`, {
         password,
         passwordConfirm,
       });

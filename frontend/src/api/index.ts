@@ -7,12 +7,4 @@ const API = axios.create({
   withCredentials: true,
 });
 
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem('jwt');
-  if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
-  }
-  return req;
-});
-
 export default API;

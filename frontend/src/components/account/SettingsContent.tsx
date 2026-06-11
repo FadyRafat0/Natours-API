@@ -65,7 +65,7 @@ const SettingsContent = () => {
 
     setPasswordLoading(true);
     try {
-      await API.patch("/users/updatePassword", {
+      const res = await API.patch("/users/updatePassword", {
         oldPassword,
         newPassword,
         passwordConfirm,
