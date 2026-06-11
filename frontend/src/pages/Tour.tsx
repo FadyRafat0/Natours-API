@@ -18,20 +18,21 @@ const Tour = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
+
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [isBooked, setIsBooked] = useState(false);
+  const [bookingCheckLoading, setBookingCheckLoading] = useState(false);
+
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const alertMsg = searchParams.get('alert');
     if (alertMsg === 'booking') {
-      // Small timeout to allow render before alert
       setTimeout(() => alert("Your booking was successful!"), 100);
+      setIsBooked(true); 
     } else if (alertMsg === 'booking_failed') {
       setTimeout(() => alert("Your booking was cancelled or failed."), 100);
     }
   }, [location.search]);
-  
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [isBooked, setIsBooked] = useState(false);
-  const [bookingCheckLoading, setBookingCheckLoading] = useState(false);
 
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
