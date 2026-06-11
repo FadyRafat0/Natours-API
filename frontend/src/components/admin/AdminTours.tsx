@@ -268,7 +268,7 @@ const AdminTours = () => {
         maxWidth="800px"
       >
         <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}
         >
           <div>
             <label className="form__label">
@@ -360,7 +360,7 @@ const AdminTours = () => {
               className="form__input"
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
-              rows={4}
+              rows={3}
             />
           </div>
           <button
