@@ -23,6 +23,7 @@ const AdminTours = () => {
   const [formMaxGroupSize, setFormMaxGroupSize] = useState("");
   const [formSummary, setFormSummary] = useState("");
   const [formDescription, setFormDescription] = useState("");
+  const [formImageCover, setFormImageCover] = useState("");
 
   const fetchTours = async () => {
     try {
@@ -71,6 +72,7 @@ const AdminTours = () => {
           maxGroupSize: Number(formMaxGroupSize),
           summary: formSummary,
           description: formDescription,
+          imageCover: formImageCover,
         });
       } else {
         await API.post(`/tours`, {
@@ -81,6 +83,7 @@ const AdminTours = () => {
           duration: Number(formDuration),
           summary: formSummary,
           description: formDescription,
+          imageCover: formImageCover || "default.jpg",
         });
       }
       setEditingTour(null);
@@ -100,6 +103,7 @@ const AdminTours = () => {
     setFormMaxGroupSize(String(t.maxGroupSize || ""));
     setFormSummary(t.summary || "");
     setFormDescription(t.description || "");
+    setFormImageCover(t.imageCover || "");
   };
 
   const openCreate = () => {
@@ -111,6 +115,7 @@ const AdminTours = () => {
     setFormMaxGroupSize("");
     setFormSummary("");
     setFormDescription("");
+    setFormImageCover("default.jpg");
   };
 
   return (
@@ -260,9 +265,10 @@ const AdminTours = () => {
           setEditingTour(null);
         }}
         title={creating ? "Create Tour" : "Edit Tour"}
+        maxWidth="800px"
       >
         <div
-          style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}
         >
           <div>
             <label className="form__label">
@@ -325,7 +331,7 @@ const AdminTours = () => {
               required
             />
           </div>
-          <div>
+          <div style={{ gridColumn: "1 / -1" }}>
             <label className="form__label">
               Summary <span style={{ color: "red" }}>*</span>
             </label>
@@ -336,7 +342,19 @@ const AdminTours = () => {
               required
             />
           </div>
-          <div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label className="form__label">
+              Image Cover (Filename) <span style={{ color: "red" }}>*</span>
+            </label>
+            <input
+              className="form__input"
+              value={formImageCover}
+              onChange={(e) => setFormImageCover(e.target.value)}
+              placeholder="tour-1-cover.jpg"
+              required
+            />
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
             <label className="form__label">Description</label>
             <textarea
               className="form__input"
@@ -347,7 +365,7 @@ const AdminTours = () => {
           </div>
           <button
             className="btn btn--small btn--green"
-            style={{ marginTop: "1rem" }}
+            style={{ marginTop: "1rem", gridColumn: "1 / -1" }}
             onClick={handleSave}
           >
             Save
