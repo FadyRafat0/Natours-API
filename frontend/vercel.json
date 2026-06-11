@@ -5,6 +5,10 @@
       "destination": "https://fady-natours-api.vercel.app/api/$1"
     },
     {
+      "source": "/img/(.*)",
+      "destination": "https://fady-natours-api.vercel.app/img/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
