@@ -60,11 +60,10 @@ const createBookingCheckout = async (session) => {
     try {
         const tour = session.client_reference_id;
         const userDoc = await User.findOne({ email: session.customer_email });
-        if (!userDoc) throw new Error('User not found for booking');
+        if (!userDoc) throw new AppError('User not found for booking');
         const user = userDoc.id;
         const price = session.amount_total / 100;
         await Booking.create({ tour, user, price });
-        console.log(`Booking created successfully for user ${user} and tour ${tour}`);
     } catch (err) {
         console.error('Error creating booking from webhook:', err);
     }
@@ -72,9 +71,6 @@ const createBookingCheckout = async (session) => {
 
 export const webhookCheckout = (req, res, next) => {
     const signature = req.headers['stripe-signature'];
-    
-    console.log('Webhook endpoint hit!');
-
     let event;
     try {
         event = stripe.webhooks.constructEvent(
@@ -83,13 +79,10 @@ export const webhookCheckout = (req, res, next) => {
             process.env.STRIPE_WEBHOOK_SECRET
         );
     } catch (err) {
-        console.error(`Webhook signature verification failed: ${err.message}`);
-        return res.status(400).send(`Webhook error: ${err.message}`);
+        return next(new AppError(`Webhook Error: ${err.message}`, 400));
     }
 
     if (event.type === 'checkout.session.completed') {
-        console.log('Checkout session completed event received.');
-        // Don't await it so we can send the response to Stripe immediately
         createBookingCheckout(event.data.object);
     }
 
