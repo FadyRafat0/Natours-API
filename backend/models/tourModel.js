@@ -145,13 +145,12 @@ tourSchema.pre(/^find/, function () {
 });
 
 // Cascade delete reviews and bookings when a tour is deleted
-tourSchema.pre('findOneAndDelete', async function (next) {
+tourSchema.pre('findOneAndDelete', async function () {
     const docToDelete = await this.model.findOne(this.getQuery());
     if (docToDelete) {
         await mongoose.model('Review').deleteMany({ tour: docToDelete._id });
         await mongoose.model('Booking').deleteMany({ tour: docToDelete._id });
     }
-    next();
 });
 
 const Tour = mongoose.model('Tour', tourSchema);

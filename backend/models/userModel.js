@@ -165,7 +165,7 @@ userSchema.methods.createEmailOTP = function () {
 };
 
 // Cascade delete reviews and bookings when a user is deleted
-userSchema.pre('findOneAndDelete', async function (next) {
+userSchema.pre('findOneAndDelete', async function () {
     const docToDelete = await this.model.findOne(this.getQuery());
     if (docToDelete) {
         const Review = mongoose.model('Review');
@@ -176,7 +176,6 @@ userSchema.pre('findOneAndDelete', async function (next) {
         }
         await mongoose.model('Booking').deleteMany({ user: docToDelete._id });
     }
-    next();
 });
 
 const User = mongoose.model('User', userSchema);
