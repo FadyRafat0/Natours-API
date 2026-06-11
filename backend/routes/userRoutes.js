@@ -16,11 +16,14 @@ router.post('/signup', authLimiter, authController.signup);
 router.post('/login', authLimiter, authController.login);
 // post not get to avoid pre-fetching by the browser problem
 router.post('/logout', authController.logout);
+
+// Dont Want the Demo Admin to modify the data
+router.use(authController.restrictDemoAdmin);
+
 router.post('/forgotPassword', authLimiter, authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 
 router.use(authController.authenticateUser);
-router.use(authController.restrictDemoUser);
 
 router.post('/sendVerificationOtp', authController.sendVerificationOtp);
 router.post('/verifyEmailOtp', authController.verifyEmailOtp);
@@ -37,6 +40,7 @@ router
         userController.updateMe,
     )
     .delete(userController.deleteUser);
+
 
 // restriced only to admin
 router.use(authController.authorizeRoles('admin'));

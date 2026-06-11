@@ -96,8 +96,8 @@ export const authorizeRoles = (...roles) => {
 };
 
 // Block write operations for the demo admin account
-const DEMO_ADMIN_EMAIL = 'demo@fady-natours.com';
-export const restrictDemoUser = (req, res, next) => {
+const DEMO_ADMIN_EMAIL = 'demo-admin@fady-natours.com';
+export const restrictDemoAdmin = (req, res, next) => {
     if (
         req.user &&
         req.user.email === DEMO_ADMIN_EMAIL &&

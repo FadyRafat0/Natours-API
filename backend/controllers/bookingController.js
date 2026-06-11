@@ -21,9 +21,9 @@ export const getCheckoutSession = catchAsync(async (req, res, next) => {
         // Accept credit cards
         payment_method_types: ['card'],
         // Where to send the user after a successful payment
-        success_url: `${frontendUrl}/tour/${tour.nameSlug}`,
+        success_url: `${frontendUrl}/tour/${tour.nameSlug}?alert=booking`,
         // Where to send the user if they cancel midway
-        cancel_url: `${frontendUrl}/tour/${tour.nameSlug}`,
+        cancel_url: `${frontendUrl}/tour/${tour.nameSlug}?alert=booking_failed`,
 
         // Customer details
         customer_email: req.user.email,
@@ -57,14 +57,23 @@ export const getCheckoutSession = catchAsync(async (req, res, next) => {
 });
 
 const createBookingCheckout = async (session) => {
-    const tour = session.client_reference_id;
-    const user = (await User.findOne({ email: session.customer_email })).id;
-    const price = session.amount_total / 100;
-    await Booking.create({ tour, user, price });
+    try {
+        const tour = session.client_reference_id;
+        const userDoc = await User.findOne({ email: session.customer_email });
+        if (!userDoc) throw new Error('User not found for booking');
+        const user = userDoc.id;
+        const price = session.amount_total / 100;
+        await Booking.create({ tour, user, price });
+        console.log(`Booking created successfully for user ${user} and tour ${tour}`);
+    } catch (err) {
+        console.error('Error creating booking from webhook:', err);
+    }
 };
 
 export const webhookCheckout = (req, res, next) => {
     const signature = req.headers['stripe-signature'];
+    
+    console.log('Webhook endpoint hit!');
 
     let event;
     try {
@@ -74,10 +83,13 @@ export const webhookCheckout = (req, res, next) => {
             process.env.STRIPE_WEBHOOK_SECRET
         );
     } catch (err) {
+        console.error(`Webhook signature verification failed: ${err.message}`);
         return res.status(400).send(`Webhook error: ${err.message}`);
     }
 
     if (event.type === 'checkout.session.completed') {
+        console.log('Checkout session completed event received.');
+        // Don't await it so we can send the response to Stripe immediately
         createBookingCheckout(event.data.object);
     }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import API from '../api';
 import type { Tour as TourType } from '../types';
 import { tourImg, userImg, formatDate } from '../utils/helpers';
@@ -12,10 +12,22 @@ const ICONS = '/img/icons.svg';
 
 const Tour = () => {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const { user } = useAuth();
   const [tour, setTour] = useState<TourType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const alertMsg = searchParams.get('alert');
+    if (alertMsg === 'booking') {
+      // Small timeout to allow render before alert
+      setTimeout(() => alert("Your booking was successful!"), 100);
+    } else if (alertMsg === 'booking_failed') {
+      setTimeout(() => alert("Your booking was cancelled or failed."), 100);
+    }
+  }, [location.search]);
   
   const [bookingLoading, setBookingLoading] = useState(false);
   const [isBooked, setIsBooked] = useState(false);
