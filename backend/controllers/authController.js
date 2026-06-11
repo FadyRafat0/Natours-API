@@ -54,19 +54,8 @@ export const authenticateUser = catchAsync(async (req, res, next) => {
         );
     }
 
-    // 4) Check if user changed password after the token was issued
-    if (user.changedPasswordAfter(decoded.iat)) {
-        return next(
-            new AppError(
-                'User recently changed password! Please log in again.',
-                401,
-            ),
-        );
-    }
-
     // to make the user data available in the next middlewares
     req.user = user;
-    res.locals.user = user;
     next();
 });
 export const checkEmailVerified = catchAsync(async (req, res, next) => {
