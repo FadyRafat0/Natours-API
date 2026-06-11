@@ -18,12 +18,12 @@ router.post('/login', authLimiter, authController.login);
 router.post('/logout', authController.logout);
 
 // Dont Want the Demo Admin to modify the data
-router.use(authController.restrictDemoAdmin);
 
 router.post('/forgotPassword', authLimiter, authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 
 router.use(authController.authenticateUser);
+router.use(authController.restrictDemoAdmin);
 
 router.post('/sendVerificationOtp', authController.sendVerificationOtp);
 router.post('/verifyEmailOtp', authController.verifyEmailOtp);
